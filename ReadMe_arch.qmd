@@ -1,0 +1,13 @@
+---
+title: "ReadMe"
+format: html
+editor: visual
+---
+
+# Background
+
+Need a summary of efforts with Andrew Roberts.
+
+Andrew Roberts extracted these data from flatfiles on the DFO archive and sent them to me (DATE: August 2025). The codes for the flat files are in the "spec" file.
+
+Copy from Data and Analyses from other files
