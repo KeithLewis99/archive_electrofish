@@ -8,6 +8,6 @@ editor: visual
 
 Need a summary of efforts with Andrew Roberts.
 
-Andrew Roberts extracted these data from flatfiles on the DFO archive and sent them to me (DATE: August 2025). The codes for the flat files are in the "spec" file.
+Andrew Roberts extracted these data from flatfiles on the DFO archive and sent them to me (DATE: August 2025). The codes for the flat files are in the "spec" file. These use the codes from Waldron 1974 but its hard to find matches.
 
 Copy from Data and Analyses from other files
