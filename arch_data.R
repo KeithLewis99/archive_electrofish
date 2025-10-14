@@ -46,36 +46,52 @@ levels(df_all$Species) <- c("4", "AS-ll", "AS-an", "BnT", "BT", "700")
 ## see also NL River Codes_updated 2024.xlsx (worksheet: pivot) in main restoration folder
 
 remove <- c(1416821, 2215270,
-            2216821, 2217260,
-            2416811, 2416821,
-            3614071, 3614072) # these rivers have no River Code in the above file or in the old Waldron codes.  I can't match them to anything. Most are 1 or 2 years.  The last two are three years; 2416821 has 4 years - likely Waterford; 
+            2216821, 2217260) # these rivers have no River Code in the above file or in the old Waldron codes.  I can't match them to anything. Most are 1 or 2 years.  The last two are three years; 2416821 has 4 years - likely Waterford; 
 ## asked Clarke and Kristin about these - may be able to salvage a few.
  
 df_all <- df_all |>
    filter(! River_Code %in% remove)
 
+# rivers ----
 # make a csv for teh River_Code and River Names in electro_fish.xlsx
 ## join them to df_all
 
-river_codes <- read.csv("river_codes.csv")
+river_codes <- read.csv("../../NL_river_names_codes/NL_river_codes_updated_2024.csv")
+str(river_codes)
+river_codes$RIVER.CODE <- as.integer(river_codes$RIVER.CODE)
 
-left_join(df_all, river_codes, by = River_Code = river_codes)
-
+row.names(river_codes[!unique(river_codes$RIVER.CODE),])
+river_codes <- river_codes |>
+   filter(!is.na(RIVER.CODE))
+df_all <- left_join(df_all, river_codes, by = c("River_Code" = "RIVER.CODE"))
+str(df_all, give.attr = F)
 
 # sum catch ----
 ## first, create a table for abun = T (total catch) and biomass
-df_sum <- df_all |>
-   group_by(Year, 
+df_sum_T <- df_all |>
+   group_by(River_Code,
+            RIVER.NAME,
+            Year, 
             Month, 
             Station, 
             Species, 
             Sweep_Number) |>
    summarise(abun = n()) 
-str(df_sum, give.attr = F)
+str(df_sum_T, give.attr = F)
+
+# calculate Sweep_number by Year and Station
+
+df_sum_T |>
+   group_by(River_Code, Year, Species) |> 
+   summarise(maxSweep = max(Sweep_Number)) |>
+   print(n = Inf)
 
 # filter records with weight and repeat above - this will give 
+
 df_sum_bio <- df_all |>
-   group_by(Year, 
+   group_by(River_Code,
+            RIVER.NAME,
+            Year, 
             Month, 
             Station, 
             Species, 
@@ -83,6 +99,57 @@ df_sum_bio <- df_all |>
    filter(!is.na(Weight)) |>
    summarise(bio.sum = sum(Weight, na.rm = T),
              abun = n()) 
+str(df_sum_bio, give.attr = F)
+
+# should joing these back
+
+df_sum <- left_join(df_sum_T, df_sum_bio, 
+                    by = c("River_Code",
+                           "RIVER.NAME",
+                           "Year", 
+                           "Month", 
+                           "Station", 
+                           "Species", 
+                           "Sweep_Number")) |>
+   rename(abun = abun.x, abu_bio = abun.y)
+str(df_sum, give.attr = F)
+length(df_sum$bio.sum[is.na(df_sum$bio.sum)]) # 221 bio.sum are NA
+
+unique(df_sum$RIVER.NAME)
+unique(df_sum$River_Code)
+
+# I think that the thing to do here is to have a dens
+## but I can't get density for most of these because we won't have area
+### is this even worth doing?  I think its something but nothing will be comparable
+
+# grid ----
+# create dataset with all possible combinations of the following variables
+# there NA's or blanks in all of these
+river <- unique(df_sum$River_Code)
+year <- as.character(unique(df_sum$Year))
+station <- unique(df_sum$Station)
+species <- c("AS", "ASYOY", "BT", "BTYOY")
+sweep <- c(1:max(df_sum$Sweep_Number))
+
+# make grid
+df_grid <- expand.grid(Year = year, 
+                       Species = species,
+                       Station = station,
+                       Sweep = sweep) |> 
+   arrange(Year, Species, Station, Sweep)
+#str(df_grid)
+
+# write.csv(df_grid, "data_derived/df_grid.csv")
+
+# edit grid ----
+
+# get max by Year and Station
+df_sweep <- df_sum |> 
+   group_by(Year, Station) |>
+   summarise(max_sweep = max(Sweep)) |> 
+   pivot_wider(id_cols = Year,
+               names_from = Station,
+               values_from = max_sweep)
 
 # Calculate T ----
 ## look for any issues such as lots of sweeps etc.
