@@ -15,7 +15,8 @@ library(leaflet)
 library(dplyr)
 library(ggpubr)
 
-coords <- read.csv("river_coordinates.csv")
+coords <- read.csv("river_coordinates-v1.csv")
+#coords_PB <- read.csv("../../PamehacDepletion/data/waypoints.csv")
 str(coords)
 ```
 
@@ -28,22 +29,26 @@ str(coords)
 # biomass,
 # reference
 leaflet()%>% 
-   setView(lng = -55.28,lat=48.99,zoom=7)%>% 
+   setView(lng = -55.28,lat=48.99,zoom=5)%>% 
    addTiles() %>%
    addCircleMarkers(data=distinct(coords, river_code,	
                                   river_name,	
                                   lat,	
                                   long,
-                                  density,
-                                  biomass
+                                  years,
+                                  data_quality,
+                                  descriptor,
+                                  reference
    ), 
    popup = ~paste0(
       "Code: ", river_code,
       "<br>Name: ", river_name,
       "<br>Lat: ", lat,
       "<br>Long: ", long,
-      "<br>Density: ", density,
-      "<br>Biomass: ", biomass
+      "<br>Years: ", years,
+      "<br>Data Quality: ", data_quality,
+      "<br>Project Descriptor: ", descriptor,
+      "<br>Reference: ", reference
    ), 
    radius = 6, 
    color = 'black', 
@@ -51,4 +56,20 @@ leaflet()%>%
    stroke = TRUE, 
    weight = 1, 
    fillOpacity = 0.5)
+   # addCircleMarkers(data=distinct(coords_PB, site, long = west, lat = north
+   # ), 
+   # popup = ~paste0(
+   #    "Code: ", river_code,
+   #    "<br>Name: ", river_name,
+   #    "<br>Lat: ", lat,
+   #    "<br>Long: ", long,
+   #    "<br>Density: ", density,
+   #    "<br>Biomass: ", biomass
+   # ), 
+   # radius = 3, 
+   # color = 'black', 
+   # fillColor = 'red', 
+   # stroke = TRUE, 
+   # weight = 1, 
+   # fillOpacity = 0.25)
 ```
