@@ -51,6 +51,7 @@ write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_ci_2001_2003.csv", row.name
 df_med <- read.csv("data/export_med.csv")
 str(df_med)
 unique(df_med$species)
+unique(df_med$study_area)
 unique(df_med$age)
 
 # standardize area
@@ -107,13 +108,13 @@ str(df_med2)
 #    filter(data_den == "2b" & age_new == "YOY")
 # test |> select(year, species, age, density, density_new, area)
 
-df_2b_yoy <- fn_filterAge(df_med2, data_den, "2b", age == 0)
-df_2b_1 <- fn_filterAge(df_med2, data_den, "2b", age > 0)
-str(df_2b_1)
+df_2b_den_yoy <- fn_filterAge(df_med2, data_den, "2b", age == 0)
+df_2b_den_a1 <- fn_filterAge(df_med2, data_den, "2b", age > 0)
+str(df_2b_den_a1)
 
 # delta Age1 - density_new, d_se_new
-df_2b_d1 <- fn_delta_Age(df_2b_1, density_new, d_se_new)
-str(df_2b_d1, give.attr = F)
+df_2b_den_a1_d <- fn_delta_Age(df_2b_den_a1, var2 = density_new, var3 = d_se_new)
+str(df_2b_den_a1_d, give.attr = F)
 
 # this converts se to var and does partial derivative
 ## this matches EXCEL
@@ -127,11 +128,11 @@ str(df_2b_d1, give.attr = F)
 # year: partial derivaties
 # temp3 <- fn_delta_derivative_site(df_2b_yoy)
 #df_2b_yoy |> select(year, species, trt, density_new, d_se_new)
-df_2b_d0pd <- fn_delta_derivative_year(df_2b_yoy, d_se_new, "YOY")
-str(df_2b_d0pd, give.attr = F)
+df_2b_den_yoy_pdy <- fn_delta_derivative_year(df_2b_den_yoy, d_se_new, "se")
+str(df_2b_den_yoy_pdy, give.attr = F)
 #df_2b_d0pd |> select(year, species, trt, density_new, dyear_var)
-df_2b_d1pd <- fn_delta_derivative_year(df_2b_d1, dsum_var, "a1")
-str(df_2b_d1pd, give.attr = F)
+df_2b_den_a1_pdy <- fn_delta_derivative_year(df_2b_den_a1_d, dsum_var, "var")
+str(df_2b_den_a1_pdy, give.attr = F)
 
 # this takes mean of density and variance
 # test2 <- test1 |>
@@ -145,94 +146,173 @@ str(df_2b_d1pd, give.attr = F)
 # test2
 
 # delta
-df_2b_yoy_den <- fn_delta_year(df_2b_d0pd, density_new)
-df_2b_yoy_den$age <- "YOY"
-df_2b_a1_den <- fn_delta_year(df_2b_d1pd, dsum)
-df_2b_a1_den$age <- "1+"
+df_2b_yoy_den_yr <- fn_delta_year(df_2b_den_yoy_pdy, density_new)
+df_2b_yoy_den_yr$age <- "YOY"
+df_2b_a1_den_yr <- fn_delta_year(df_2b_den_a1_pdy, dsum)
+df_2b_a1_den_yr$age <- "1+"
 
-df_2b_den <- rbind(df_2b_yoy_den, df_2b_a1_den)
+df_2b_den <- rbind(df_2b_yoy_den_yr, df_2b_a1_den_yr)
 
 # this matches EXCEL -          
 
 ### 2b biomass ----
 # filter by age and data type
-df_2b_yoy_bio <- fn_filterAge(df_med2, data_bio, "2b", age == 0)
-df_2b_a1_bio <- fn_filterAge(df_med2, data_bio, "2b", age > 0)
-str(df_2b_1)
+df_2b_bio_yoy <- fn_filterAge(df_med2, data_bio, "2b", age == 0)
+df_2b_bio_a1 <- fn_filterAge(df_med2, data_bio, "2b", age > 0)
+str(df_2b_bio_a1)
 
 # delta Age1
-df_2b_d1 <- fn_delta_Age(df_2b_1, biomass_new, b_se_new)
-str(df_2b_d1, give.attr = F)
+df_2b_bio_da1 <- fn_delta_Age(df_2b_bio_a1, var2 = biomass_new, var3 = b_se_new)
+str(df_2b_bio_da1, give.attr = F)
 
 ## this matches EXCEL
 
 # year: partial derivaties
 # this converts se to var and does partial derivative
-df_2b_d0pd_bio <- fn_delta_derivative_year(df_2b_yoy, d_se_new, "YOY")
-df_2b_d1pd_bio <- fn_delta_derivative_year(df_2b_d1, dsum_var, "a1")
-str(df_2b_d1pd_bio, give.attr = F)
+df_2b_bio_yoy_pdy <- fn_delta_derivative_year(df_2b_bio_yoy, d_se_new, "se")
+df_2b_bio_a1_pdy <- fn_delta_derivative_year(df_2b_bio_da1, dsum_var, "var")
+str(df_2b_bio_a1_pdy, give.attr = F)
 
 
 # delta
 # this takes mean of biomass and variance
-df_2b_yoy_bio <- fn_delta_year(df_2b_d0pd_bio, biomass_new)
-df_2b_yoy_bio$age <- "YOY"
-df_2b_a1_bio <- fn_delta_year(df_2b_d1pd_bio, dsum)
-df_2b_a1_bio$age <- "1+"
+df_2b_bio_yoy_yr <- fn_delta_year(df_2b_bio_yoy_pdy, biomass_new)
+df_2b_bio_yoy_yr$age <- "YOY"
+df_2b_bio_a1_yr <- fn_delta_year(df_2b_bio_a1_pdy, dsum)
+df_2b_bio_a1_yr$age <- "1+"
 
 # biomass
-df_2b_bio <- rbind(df_2b_yoy_bio, df_2b_a1_bio)
+df_2b_bio <- rbind(df_2b_bio_yoy_yr, df_2b_bio_a1_yr)
 
 
 
-## 2a ----
+## 2a den ----
 # filter ages
-### age ----
-temp2a <- df_med2 |> filter(study_area == "Copper Lake")
-df_2a_yoy <- fn_filterAge(temp2a, data_den, "2a", age_new == "YOY")
-df_2a_1 <- fn_filterAge(temp2a, data_den, "2a", age > 0 & age != "YOY") #& age != "YOY"
-str(df_2a_1)
-unique(df_2a_1$age)
-unique(df_2a_1$study_area)
+### age-CL-JF ----
+unique(df_med2$study_area)
+df_2a_CL_JF <- df_med2 |> filter(
+   study_area == "Copper Lake" | 
+      study_area == "Joe Farrell's ")
+
+df_2a_den_yoy <- fn_filterAge(df_2a_CL_JF, data_den, "2a", age_new == "YOY")
+df_2a_den_a1 <- fn_filterAge(df_2a_CL_JF, data_den, "2a", age > 0 & age != "YOY") #& age != "YOY"
+str(df_2a_den_a1)
+unique(df_2a_den_a1$age)
+unique(df_2a_den_a1$study_area)
 
 # delta Age1 - density_new, d_se_new
-df_2a_1d <- fn_delta_Age(df_2a_1, stations, density_new, d_se_new)
-str(df_2a_1d, give.attr = F)
+df_2a_den_a1d <- fn_delta_Age(df_2a_den_a1, stations, density_new, d_se_new)
+str(df_2a_den_a1d, give.attr = F)
 
 
 ### sites ----
-df_2a_yoy |> select(study_area, year, species, site, stations, age_new, density_new)
-df_2a_yoy_pd <- fn_delta_derivative_site(df_2a_yoy, d_se_new, "YOY")
-df_2a_yoy_pd <- fn_delta_derivative_site(df_2a_yoy, d_se_new, "se")
-
+# df_2a_yoy |> select(study_area, year, species, site, stations, age_new, density_new)
+# df_2a_yoy_pd <- fn_delta_derivative_site(df_2a_yoy, d_se_new, "YOY")
+df_2a_den_yoy_pds <- fn_delta_derivative_site(df_2a_den_yoy, d_se_new, "se")
 str(test, give.attr = F)
-df_2a_yoy_pd |> select(year,site, age_new, density_new, d_se_new, dsite_var)
+df_2a_den_yoy_pds |> select(year, site, age_new, density_new, d_se_new, dsite_var)
+df_2a_den_yoy_site <- fn_delta_site(df_2a_den_yoy_pds, density_new)
 
-df_2a_yoy_site <- fn_delta_site(df_2a_yoy_pd, dsite_var)
-
-df_2a_a1_pd <- fn_delta_derivative_site(df_2a_yoy, d_se_new, "a1")
-df_2a_a1_site <- fn_delta_site(df_2a_a1_pd, dsite_var)
+df_2a_den_a1_pds <- fn_delta_derivative_site(df_2a_den_a1d, dsum_var, "var")
+df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds, dsum)
 
 ### years ----
 # this converts se to var and does partial derivative
 ## this matches EXCEL
-df_2a_d0pd <- fn_delta_derivative_year(df_2a_yoy_site, var_site, "a1")
+df_2a_den_yoy_pdy <- fn_delta_derivative_year(df_2a_den_yoy_site, se_site, "se")
 #df_2b_d0pd |> select(year, species, trt, density_new, dyear_var)
-df_2a_d1pd <- fn_delta_derivative_year(df_2a_a1_site, var_site, "a1")
-str(df_2a_d1pd)
+df_2a_den_a1_pdy <- fn_delta_derivative_year(
+   df_2a_den_a1_site, se_site, "se")
+str(df_2a_den_a1_pdy, give.attr = F)
 
 # delta
 # this takes mean of density and variance
-df_2a_yoy_den <- fn_delta_year(df_2a_d0pd, mean_site)
-df_2a_yoy_den$age <- "YOY"
-df_2a_a1_den <- fn_delta_year(df_2a_d1pd, mean_site)
-df_2a_a1_den$age <- "1+"
+df_2a_den_yoy <- fn_delta_year(df_2a_den_yoy_pdy, mean_site)
+df_2a_den_yoy$age <- "YOY"
+df_2a_den_a1 <- fn_delta_year(df_2a_den_a1_pdy, mean_site)
+df_2a_den_a1$age <- "1+"
 
 # den
-df_2a_den <- rbind(df_2a_yoy_den, df_2a_a1_den)
+df_2a_den <- rbind(df_2a_den_yoy, df_2a_den_a1) |>
+   arrange(study_area)
+# biomass for CL is 3a
+# no biomass for Joe Farrell's
+
+### age - WS ----
+unique(df_med2$study_area)
+df_2a_WS <- df_med2 |> filter(
+   study_area == "West Salmon River")
+
+unique(df_2a_WS$age_new)
+df_2a_den_yoy <- fn_filterAge(df_2a_WS, data_den, "2a", age == "0")
+df_2a_den_a1 <- fn_filterAge(df_2a_WS, data_den, "2a", age > 0) #& age != "YOY"
+str(df_2a_den_a1)
+unique(df_2a_den_a1$age)
+unique(df_2a_den_a1$study_area)
+
+# delta Age1 - density_new, d_se_new
+df_2a_den_a1d <- fn_delta_Age(df_2a_den_a1, site, density_new, d_se_new)
+str(df_2a_den_a1d, give.attr = F)
 
 
-############ START HERE###### 
+### sites ----
+# df_2a_yoy |> select(study_area, year, species, site, stations, age_new, density_new)
+# df_2a_yoy_pd <- fn_delta_derivative_site(df_2a_yoy, d_se_new, "YOY")
+df_2a_den_yoy_pds <- fn_delta_derivative_site(df_2a_den_yoy, d_se_new, "se")
+df_2a_den_yoy_site <- fn_delta_site(df_2a_den_yoy_pds, density_new)
+df_2a_den_yoy_site$age <- "YOY"
+
+
+df_2a_den_a1_pds <- fn_delta_derivative_site(df_2a_den_a1d, dsum_var, "var")
+df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds, dsum)
+df_2a_den_a1_site$age <- "1+"
+
+### years ----
+# no Years for West Salmon River - just 1992
+
+# den
+df_2a_den <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site) |>
+   arrange(study_area)
+
+## 2c ----
+### age - WS ----
+unique(df_med2$study_area)
+df_2a_WS <- df_med2 |> filter(
+   study_area == "West Salmon River")
+
+unique(df_2a_WS$age_new)
+df_2a_den_yoy <- fn_filterAge(df_2a_WS, data_den, "2a", age == "0")
+df_2a_den_a1 <- fn_filterAge(df_2a_WS, data_den, "2a", age > 0) #& age != "YOY"
+str(df_2a_den_a1)
+unique(df_2a_den_a1$age)
+unique(df_2a_den_a1$study_area)
+
+# delta Age1 - density_new, d_se_new
+df_2a_den_a1d <- fn_delta_Age(df_2a_den_a1, site, density_new, d_se_new)
+str(df_2a_den_a1d, give.attr = F)
+
+
+### sites ----
+# df_2a_yoy |> select(study_area, year, species, site, stations, age_new, density_new)
+# df_2a_yoy_pd <- fn_delta_derivative_site(df_2a_yoy, d_se_new, "YOY")
+df_2a_den_yoy_pds <- fn_delta_derivative_site(df_2a_den_yoy, d_se_new, "se")
+df_2a_den_yoy_site <- fn_delta_site(df_2a_den_yoy_pds, density_new)
+df_2a_den_yoy_site$age <- "YOY"
+
+
+df_2a_den_a1_pds <- fn_delta_derivative_site(df_2a_den_a1d, dsum_var, "var")
+df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds, dsum)
+df_2a_den_a1_site$age <- "1+"
+
+### years ----
+# no Years for West Salmon River - just 1992
+
+# den
+df_2a_den <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site) |>
+   arrange(study_area)
+
+
+# START HERE###### 
 
 df_med3 <- df_med2 |>
    group_by(study_area, site, year, species, trt, age, data_den, data_bio) |>
