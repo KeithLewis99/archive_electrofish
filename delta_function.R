@@ -68,25 +68,25 @@ fn_delta_Age <- function(df, var1 = NULL, var2, var3) {
 #    }
 # }   
 
-fn_delta_derivative_site <- function(df, var1, var = "var"){
-   # browser()
+fn_delta_derivative_site <- function(df, var1, var = "var", trt = NULL){
+    # browser()
    if(var == "se"){
       df_pd <- df |>
-         group_by(study_area, year, species, trt) |>
+         group_by(study_area, year, species, {{trt}}) |>
          mutate(dsite_var = {{var1}}^2*1/n()^2)      
    } else if(var == "var") {
       df_pd <- df |>
-         group_by(study_area, year, species, trt) |>
+         group_by(study_area, year, species, {{trt}}) |>
          mutate(dsite_var = {{var1}}*1/n()^2)  
    }
+   return(df_pd)
 }   
 
-
 # take means over sites    
-fn_delta_site <- function(df, var1){
+fn_delta_site <- function(df, var1, trt = NULL){
    #browser()
    df_delta_site <- df |> 
-      group_by(study_area, year, species, trt) |>
+      group_by(study_area, year, species, {{trt}}) |>
       summarize(
          mean_site = mean({{var1}}, na.rm = T),
          se_site = sqrt(mean(dsite_var, na.rm = T)),
@@ -112,15 +112,15 @@ fn_delta_site <- function(df, var1){
 # year: partial derivaties
 # take the parial deriviatives; var1 is the variance (d_se_new or b_se_new)
 ## age is just YOY as need to make variance from an SE but this was done in the previous step above
-fn_delta_derivative_year <- function(df, var1, var = "var"){
+fn_delta_derivative_year <- function(df, var1, var = "var", trt = NULL){
    # browser()
    if(var == "se"){
       df_pd <- df |>
-         group_by(study_area, species, trt) |>
+         group_by(study_area, species, {{trt}}) |>
          mutate(dyear_var = {{var1}}^2*1/n()^2)      
          } else if(var == "var") {
       df_pd <- df |>
-         group_by(study_area, species, trt) |>
+         group_by(study_area, species, {{trt}}) |>
          mutate(dyear_var = {{var1}}*1/n()^2)  
       }
    return(df_pd)
@@ -130,10 +130,10 @@ fn_delta_derivative_year <- function(df, var1, var = "var"){
 
 # take the mean of the estimate and the variance and get CIs
 ## var1 is biomassnew
-fn_delta_year <- function(df, var1){
+fn_delta_year <- function(df, var1, trt = NULL){
    #browser()
    df_delta_year <- df |> 
-      group_by(study_area, species, trt) |>
+      group_by(study_area, species, {{trt}}) |>
       summarize(
          mean_year = mean({{var1}}, na.rm = T),
          var_year = sqrt(mean(dyear_var, na.rm = T)),
