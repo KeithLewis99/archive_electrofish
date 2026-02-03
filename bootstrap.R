@@ -46,14 +46,14 @@ write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_ci_2001_2003.csv", row.name
 
 
 # Data rank 2 ----
-## stdze data ----
-## bootstrap bc no variance at the site level so at least have it within year, species, and age
+## import data ----
 df_med <- read.csv("data/export_med.csv")
 str(df_med)
 unique(df_med$species)
 unique(df_med$study_area)
 unique(df_med$age)
 
+## stdze data ----
 # standardize area
 df_med1 <- df_med |>
    mutate(density_new = ifelse(area == 1, density*100, density)) |>
@@ -92,7 +92,7 @@ df_med2 <- df_med1a |>
                        ">=1+" = "5", 
                        ">=1+" = "6")) |>
    mutate(species = fct_recode(species,
-                           "AS" = "SAL", 
+                           #"AS" = "SAL", # For WestSalmonRiver, this is actually salmonids, not AS; the values for BT and OU add up to SAL
                            "AS" = "OU"))
    
 unique(df_med2$study_area)
@@ -274,45 +274,134 @@ df_2a_den_a1_site$age <- "1+"
 df_2a_den <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site) |>
    arrange(study_area)
 
+# Low ----
+## import data ----
+## stdz data ----
+df_low <- read.csv("data/export_low.csv")
+str(df_low)
+unique(df_low$species)
+unique(df_low$study_area)
+
+# standardize area
+df_low1 <- df_low |>
+   mutate(density_new = ifelse(modifier == 1, density*100, density)) |>
+   mutate(dll_new = ifelse(modifier == 1, dll*100, dll)) |>
+   mutate(dul_new = ifelse(modifier == 1, dul*100, dul)) |> 
+   mutate(d_se_new = ifelse(modifier == 1, d_se*100, d_se)) |> 
+   mutate(biomass_new = ifelse(modifier == 1, biomass*100, biomass)) |>
+   mutate(bll_new = ifelse(modifier == 1, bll*100, bll)) |>
+   mutate(bul_new = ifelse(modifier == 1, bll*100, bll)) |>
+   mutate(b_se_new = ifelse(modifier == 1, b_se*100, b_se)) 
+
+
 ## 2c ----
-### age - WS ----
-unique(df_med2$study_area)
-df_2a_WS <- df_med2 |> filter(
-   study_area == "West Salmon River")
-
-unique(df_2a_WS$age_new)
-df_2a_den_yoy <- fn_filterAge(df_2a_WS, data_den, "2a", age == "0")
-df_2a_den_a1 <- fn_filterAge(df_2a_WS, data_den, "2a", age > 0) #& age != "YOY"
-str(df_2a_den_a1)
-unique(df_2a_den_a1$age)
-unique(df_2a_den_a1$study_area)
-
-# delta Age1 - density_new, d_se_new
-df_2a_den_a1d <- fn_delta_Age(df_2a_den_a1, site, density_new, d_se_new)
-str(df_2a_den_a1d, give.attr = F)
+### age - GG ----
+df_2c_GG <- df_low1 |> filter(
+   study_area == "Great Gull Brook")
 
 
 ### sites ----
-# df_2a_yoy |> select(study_area, year, species, site, stations, age_new, density_new)
-# df_2a_yoy_pd <- fn_delta_derivative_site(df_2a_yoy, d_se_new, "YOY")
-df_2a_den_yoy_pds <- fn_delta_derivative_site(df_2a_den_yoy, d_se_new, "se")
-df_2a_den_yoy_site <- fn_delta_site(df_2a_den_yoy_pds, density_new)
-df_2a_den_yoy_site$age <- "YOY"
+df_2c_den_pds <- fn_delta_derivative_site(df_2c_GG, d_se_new, "se")
 
+df_2c_den_site <- fn_delta_site(df_2c_den_pds, density_new)
 
-df_2a_den_a1_pds <- fn_delta_derivative_site(df_2a_den_a1d, dsum_var, "var")
-df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds, dsum)
-df_2a_den_a1_site$age <- "1+"
 
 ### years ----
-# no Years for West Salmon River - just 1992
+# this converts se to var and does partial derivative
+## this matches EXCEL
+df_2c_den_pdy <- fn_delta_derivative_year(df_2c_den_site, se_site, "se")
+df_2a_den <- fn_delta_year(df_2c_den_pdy, mean_site)
 
-# den
-df_2a_den <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site) |>
-   arrange(study_area)
+str(df_2a_den_a1_pdy, give.attr = F)
 
 
-# START HERE###### 
+## 3a ----
+### age -  ----
+df_3a_den_yoy <- fn_filterAge(df_2a_CL_JF, data_bio, "3a", age_new == "YOY")
+df_3a_den_a1 <- fn_filterAge(df_2a_CL_JF, data_bio, "3a", age > 0 & age != "YOY")
+
+df_3a_den_a1_d <- df_3a_den_a1 |> 
+   group_by(study_area, year, species) |>
+   summarise(density = sum(density_new, na.rm = T),
+             density_se = sd(density_new, na.rm = T),
+             biomass = sum(biomass_new, na.rm = T),
+             biomass_se = sd(biomass_new, na.rm = T))
+df_3a_den_a1_d |> select(year, species, density, density_se, biomass, biomass_se)
+
+# could use the delta method for years
+df_3a_den_yoy_site <- df_3a_den_yoy |>
+   group_by(study_area, year, species) |>
+   summarise(density = mean(density, na.rm = T), 
+             biomass = mean(biomass, na.rm = T))
+df_3a_den_yoy_site
+
+df_3a_den_a1_site <- df_3a_den_a1 |>
+   group_by(study_area, year, species) |>
+   summarise(density = mean(density, na.rm = T), 
+             biomass = mean(biomass, na.rm = T))
+df_3a_den_a1_site
+
+
+df_3a_yoy_den <- df_3a_den_yoy_site |>
+   group_by(study_area, species) |>
+   summarise(density = mean(density, na.rm = T), 
+             biomass = mean(biomass, na.rm = T))
+df_3a_yoy_den
+
+df_3a_a1_den <- df_3a_den_a1_site |>
+   group_by(study_area, species) |>
+   summarise(density = mean(density, na.rm = T), 
+             biomass = mean(biomass, na.rm = T))
+df_3a_a1_den
+
+df_3a_den <- rbind(df_3a_yoy_den, df_3a_a1_den)
+df_3a_den
+
+
+
+## 3b ----
+### age - Trepassey ----
+df_3b_den_yoy <- fn_filterAge(df_med2, data_den, "3b", age == 0)
+df_3b_den_a1 <- fn_filterAge(df_med2, data_den, "3b", age > 0)
+
+df_3b_den_a1_d <- df_3b_den_a1 |> filter(
+   study_area == "Northeast Brook, Trepassey") |>
+   group_by(study_area, year, species) |>
+   summarise(density = sum(density_new),
+             density_se = sd(density_new),
+             biomass = sum(biomass_new),
+             biomass_se = sd(biomass_new))
+df_3b_den_a1_d |> select(year, species, density, density_se, biomass, biomass_se)
+
+# could use the delta method for years
+df_3b_yr <- df_3b_den_a1_d |>
+   group_by(study_area, species) |>
+   summarise(density = mean(density), 
+             biomass = mean(biomass, na.rm = T))
+df_3b_yr
+
+## 4 -----
+### Corner Brook (behind copper lake), Indian Bay, Gander River
+df_CB_IB_GR <- df_low1 |>
+   filter(data.quality == "4") |>
+   group_by(study_area, species) |>
+   summarise(density = mean(density_new), 
+             biomass = mean(biomass_new))
+
+## 5 -----
+df_TN <- df_low1 |>
+   filter(data.quality == "5a") |>
+   group_by(species) |>
+   summarise(density = mean(density_new), 
+             biomass = mean(biomass_new))
+
+
+df_TN_TI <- df_low1 |>
+   filter(data.quality == "5b") |>
+   group_by(species) |>
+   summarise(density = mean(density_new))
+
+# START HERE #####
 
 df_med3 <- df_med2 |>
    group_by(study_area, site, year, species, trt, age, data_den, data_bio) |>
