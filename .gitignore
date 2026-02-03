@@ -6,5 +6,6 @@
 *.html
 *.csv
 *.xlsx
+*.docx
 
 arch_map_files/
