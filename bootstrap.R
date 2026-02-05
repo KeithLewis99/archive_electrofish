@@ -70,10 +70,11 @@ df_med1 <- df_med |>
 # filter by data type and remove ages and species
 df_med1a <- df_med1 |>
    filter(!(age == "All") & 
-             !(age == "1 to 6")) 
+             !(age == "1 to 6")
+          & !(species == "SAL")) 
 unique(df_med1a$age)
 unique(df_med1a$area)
-
+unique(df_med1a$species)
 
 
 # standarize ages and species
@@ -116,35 +117,18 @@ str(df_2b_den_a1)
 df_2b_den_a1_d <- fn_delta_Age(df_2b_den_a1, var2 = density_new, var3 = d_se_new)
 str(df_2b_den_a1_d, give.attr = F)
 
-# this converts se to var and does partial derivative
-## this matches EXCEL
-# test1 <- test |>
-#    group_by(species, age, trt) |>
-#    mutate(dvar = (d_se_new)^2*1/n()) 
-# 
-# test1 |> 
-#    select(year, species, age, density, density_new, d_se_new, dvar) 
+df_2b_den_yoy |> select(study_area, year, species, trt, )
+df_2b_den_site <- rbind(df_2b_den_yoy, df_2b_den_a1_d)
 
 # year: partial derivaties
-# temp3 <- fn_delta_derivative_site(df_2b_yoy)
-#df_2b_yoy |> select(year, species, trt, density_new, d_se_new)
 df_2b_den_yoy_pdy <- fn_delta_derivative_year(df_2b_den_yoy, d_se_new, "se")
 str(df_2b_den_yoy_pdy, give.attr = F)
 #df_2b_d0pd |> select(year, species, trt, density_new, dyear_var)
 df_2b_den_a1_pdy <- fn_delta_derivative_year(df_2b_den_a1_d, dsum_var, "var")
 str(df_2b_den_a1_pdy, give.attr = F)
 
-# this takes mean of density and variance
-# test2 <- test1 |>
-#    group_by(species, age, trt) |>
-#    summarise(
-#       mean_site = mean(density_new, na.rm = T),
-#       var_site = sqrt(mean(dvar, na.rm = T)),
-#       ll_site = mean_site - var_site*1.96,
-#       ul_site = mean_site + var_site*1.96
-#       )
-# test2
-
+# START HERE ----
+## COMBINE YOY AND A1
 # delta
 df_2b_yoy_den_yr <- fn_delta_year(df_2b_den_yoy_pdy, density_new)
 df_2b_yoy_den_yr$age <- "YOY"
