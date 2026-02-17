@@ -24,13 +24,16 @@ fn_filterAge <- function(df, var1, data_type, condition){
 # unique(temp$study_area)
 
 # use delta method - sum age and variance; this works because its summing - if averaging, then need to take partial derivative like below
-## var1 == density_new or biomass_new, var2 is variance, e.g., d_se_new or b_se_new
+## var1 == a grouping variable like 'site', var2 is density_new or biomass_new, var3 is variance, e.g., d_se_new or b_se_new
 fn_delta_Age <- function(df, var1 = NULL, var2, var3) {
    df_dAge <- df |>
       select(study_area, year, species, age, trt, {{var1}}, {{var2}}, {{var3}})|>
       group_by(study_area, year, species, {{var1}}, trt) |>
       summarise(dsum = sum({{var2}}, na.rm = T),
-                dsum_var = sum({{var3}}, na.rm = T)^2) 
+                dsum_var = sum({{var3}}, na.rm = T)^2,
+                ll_site = dsum - sqrt(dsum_var)*1.96,
+                ul_site = dsum + sqrt(dsum_var)*1.96
+                ) 
    return(df_dAge)
 }
 
