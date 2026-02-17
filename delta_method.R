@@ -1,14 +1,12 @@
-# this file is to produce bootstrap estimates of the stoney brook data to get density and biomass estimates and ultimately, a table of all the electrofishing data.
-## see table on slide 6 of m9-2026-01-09.ppt in synthesis folder.
+# this file is to produce DELTA METHOD estimates of all the electrofishing Sstudy areas for which we don't have raw data to do bootstrapping. We will use the delta method to calculate variances for density and biomass at the age and site levels, and then for year when available. We will then use these estimates to create a table of all the electrofishing data.
+## see Table X in the tech report.
 
-# Data rank 1 ----
-# Hmisc - ben bolker approach
-#https://stackoverflow.com/questions/38554383/bootstrapped-confidence-intervals-with-dplyr
-library(Hmisc)
+
+# export_med is from the excel file df_summary_v1.xlsx where I compiled all of the data from the various reports and papers. This file focused on data in tables while Fig_data_juicr_extracted-v1.xlsx extrated data from tables and I copied this to export_med or export low depending on the quality of the data.
+## I standardized the area for some of the studies (e.g., multiplied by 100 for those that were per 1 m2) and standardized the ages and species names. I also added a column for data type (density or biomass) and data quality (1-5). I will use this file to calculate the delta method estimates for all the studies that are ranked 2-5 in terms of data quality.
+
 library(dplyr)
 source("delta_function.R")
-
-
 
 
 # Data rank 2 ----
@@ -81,10 +79,13 @@ str(df_2b_den_a1)
 
 # delta Age1 - density_new, d_se_new
 df_2b_den_a1_d <- fn_delta_Age(df_2b_den_a1, var2 = density_new, var3 = d_se_new)
+df_2b_den_a1_d$age <- "1+"
 str(df_2b_den_a1_d, give.attr = F)
 
-df_2b_den_yoy |> select(study_area, year, species, trt, )
-df_2b_den_site <- rbind(df_2b_den_yoy, df_2b_den_a1_d)
+# not working
+test <- df_2b_den_yoy |> select(study_area, year, species, trt,  density_new, d_se_new, dll_new, dul_new, age) |>
+   rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
+df_2b_den_site <- rbind(test, df_2b_den_a1_d)
 
 # year: partial derivaties
 df_2b_den_yoy_pdy <- fn_delta_derivative_year(df_2b_den_yoy, d_se_new, "se")
@@ -93,7 +94,6 @@ str(df_2b_den_yoy_pdy, give.attr = F)
 df_2b_den_a1_pdy <- fn_delta_derivative_year(df_2b_den_a1_d, dsum_var, "var")
 str(df_2b_den_a1_pdy, give.attr = F)
 
-# START HERE ----
 ## COMBINE YOY AND A1
 # delta
 df_2b_yoy_den_yr <- fn_delta_year(df_2b_den_yoy_pdy, density_new)
@@ -105,6 +105,7 @@ df_2b_den <- rbind(df_2b_yoy_den_yr, df_2b_a1_den_yr)
 
 # this matches EXCEL -          
 
+########### START HERE#######
 ### 2b biomass ----
 # filter by age and data type
 df_2b_bio_yoy <- fn_filterAge(df_med2, data_bio, "2b", age == 0)
