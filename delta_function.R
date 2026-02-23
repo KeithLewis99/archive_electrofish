@@ -12,10 +12,18 @@
 # filter dataset by data variable (data_den or bio_den)
 ## by data variable level or type (e.g. "2b")
 ## and condition: age == 0 or age > 0.....may need to add other arguements bc ages have been entered in different ways
-fn_filterAge <- function(df, var1, data_type, condition){
+# fn_filterAge <- function(df, var1, data_type, condition){
+#    # browser()
+#    df_filter <- df |>
+#       filter({{var1}} == data_type & {{condition}})
+#    return(df_filter)
+# }
+
+# revise the above
+fn_filterAge <- function(df, data_type, data_type_value, age_class){
    # browser()
    df_filter <- df |>
-      filter({{var1}} == data_type & {{condition}})
+      filter({{data_type}} == data_type_value & {{age_class}})
    return(df_filter)
 }
 
@@ -25,18 +33,30 @@ fn_filterAge <- function(df, var1, data_type, condition){
 
 # use delta method - sum age and variance; this works because its summing - if averaging, then need to take partial derivative like below
 ## var1 == a grouping variable like 'site', var2 is density_new or biomass_new, var3 is variance, e.g., d_se_new or b_se_new
-fn_delta_Age <- function(df, var1 = NULL, var2, var3) {
+# fn_delta_Age <- function(df, var1 = NULL, var2, var3) {
+#    df_dAge <- df |>
+#       select(study_area, year, species, age, trt, {{var1}}, {{var2}}, {{var3}})|>
+#       group_by(study_area, year, species, {{var1}}, trt) |>
+#       summarise(dsum = sum({{var2}}, na.rm = T),
+#                 dsum_var = sum({{var3}}, na.rm = T)^2,
+#                 ll_site = dsum - sqrt(dsum_var)*1.96,
+#                 ul_site = dsum + sqrt(dsum_var)*1.96
+#                 ) 
+#    return(df_dAge)
+# }
+
+fn_delta_Age <- function(df, group_by_var1 = NULL, pt_est2, var_est3, age) {
    df_dAge <- df |>
-      select(study_area, year, species, age, trt, {{var1}}, {{var2}}, {{var3}})|>
-      group_by(study_area, year, species, {{var1}}, trt) |>
-      summarise(dsum = sum({{var2}}, na.rm = T),
-                dsum_var = sum({{var3}}, na.rm = T)^2,
+      select(study_area, year, species, age, trt, {{group_by_var1}}, {{pt_est2}}, {{var_est3}})|>
+      group_by(study_area, year, species, {{group_by_var1}}, trt) |>
+      summarise(dsum = sum({{pt_est2}}, na.rm = T),
+                dsum_var = sum({{var_est3}}, na.rm = T)^2,
                 ll_site = dsum - sqrt(dsum_var)*1.96,
                 ul_site = dsum + sqrt(dsum_var)*1.96
-                ) 
+      ) 
+   df_dAge$age <- age
    return(df_dAge)
 }
-
 # fn_delta_Age <- function(df, var1, var2, var_trt = NULL) {
 #    if(is.null(var_trt)) {
 #       df_dAge <- df |>
@@ -71,35 +91,62 @@ fn_delta_Age <- function(df, var1 = NULL, var2, var3) {
 #    }
 # }   
 
-fn_delta_derivative_site <- function(df, var1, var = "var", trt = NULL){
-    # browser()
+# fn_delta_derivative_site <- function(df, var1, var = "var", trt = NULL){
+#     # browser()
+#    if(var == "se"){
+#       df_pd <- df |>
+#          group_by(study_area, year, species, {{trt}}) |>
+#          mutate(dsite_var = {{var1}}^2*1/n()^2)      
+#    } else if(var == "var") {
+#       df_pd <- df |>
+#          group_by(study_area, year, species, {{trt}}) |>
+#          mutate(dsite_var = {{var1}}*1/n()^2)  
+#    }
+#    return(df_pd)
+# }   
+
+fn_delta_derivative_site <- function(df, var_est1, var = "var", trt = NULL){
+   # browser()
    if(var == "se"){
       df_pd <- df |>
          group_by(study_area, year, species, {{trt}}) |>
-         mutate(dsite_var = {{var1}}^2*1/n()^2)      
+         mutate(dsite_var = {{var_est1}}^2*1/n()^2)      
    } else if(var == "var") {
       df_pd <- df |>
          group_by(study_area, year, species, {{trt}}) |>
-         mutate(dsite_var = {{var1}}*1/n()^2)  
+         mutate(dsite_var = {{var_est1}}*1/n()^2)  
    }
    return(df_pd)
 }   
 
 # take means over sites    
-fn_delta_site <- function(df, var1, trt = NULL){
+# fn_delta_site <- function(df, var1, trt = NULL){
+#    #browser()
+#    df_delta_site <- df |> 
+#       group_by(study_area, year, species, {{trt}}) |>
+#       summarize(
+#          mean_site = mean({{var1}}, na.rm = T),
+#          se_site = sqrt(mean(dsite_var, na.rm = T)),
+#          ll_site = mean_site - se_site*1.96,
+#          ul_site = mean_site + se_site*1.96
+#       )
+#    return(df_delta_site)   
+#    }     
+# temp2 <- fn_delta_Age(temp)
+
+fn_delta_site <- function(df, pt_est1, var_est2, trt = NULL, age){
    #browser()
    df_delta_site <- df |> 
       group_by(study_area, year, species, {{trt}}) |>
       summarize(
-         mean_site = mean({{var1}}, na.rm = T),
-         se_site = sqrt(mean(dsite_var, na.rm = T)),
+         mean_site = mean({{pt_est1}}, na.rm = T),
+         se_site = sqrt(mean({{var_est2}}, na.rm = T)),
          ll_site = mean_site - se_site*1.96,
          ul_site = mean_site + se_site*1.96
       )
+   df_delta_site$age <- age
    return(df_delta_site)   
-   }     
-# temp2 <- fn_delta_Age(temp)
-
+}     
 
 # Year
 # this converts se to var and does partial derivative
@@ -115,37 +162,64 @@ fn_delta_site <- function(df, var1, trt = NULL){
 # year: partial derivaties
 # take the parial deriviatives; var1 is the variance (d_se_new or b_se_new)
 ## age is just YOY as need to make variance from an SE but this was done in the previous step above
-fn_delta_derivative_year <- function(df, var1, var = "var", trt = NULL){
+# fn_delta_derivative_year <- function(df, var1, var = "var", trt = NULL){
+#    # browser()
+#    if(var == "se"){
+#       df_pd <- df |>
+#          group_by(study_area, species, {{trt}}) |>
+#          mutate(dyear_var = {{var1}}^2*1/n()^2)      
+#          } else if(var == "var") {
+#       df_pd <- df |>
+#          group_by(study_area, species, {{trt}}) |>
+#          mutate(dyear_var = {{var1}}*1/n()^2)  
+#       }
+#    return(df_pd)
+#    }
+
+
+fn_delta_derivative_year <- function(df, var_est1, var = "var", trt = NULL){
    # browser()
    if(var == "se"){
       df_pd <- df |>
          group_by(study_area, species, {{trt}}) |>
-         mutate(dyear_var = {{var1}}^2*1/n()^2)      
-         } else if(var == "var") {
+         mutate(dyear_var = {{var_est1}}^2*1/n()^2)      
+   } else if(var == "var") {
       df_pd <- df |>
          group_by(study_area, species, {{trt}}) |>
-         mutate(dyear_var = {{var1}}*1/n()^2)  
-      }
-   return(df_pd)
+         mutate(dyear_var = {{var_est1}}*1/n()^2)  
    }
-
+   return(df_pd)
+}
 #temp3 <- fn_delta_derivative_site(temp2, dsum_var)
 
 # take the mean of the estimate and the variance and get CIs
 ## var1 is biomassnew
-fn_delta_year <- function(df, var1, trt = NULL){
+# fn_delta_year <- function(df, var1, trt = NULL){
+#    #browser()
+#    df_delta_year <- df |> 
+#       group_by(study_area, species, {{trt}}) |>
+#       summarize(
+#          mean_year = mean({{var1}}, na.rm = T),
+#          var_year = sqrt(mean(dyear_var, na.rm = T)),
+#          ll_site = mean_year - var_year*1.96,
+#          ul_site = mean_year + var_year*1.96
+#       )
+#    return(df_delta_year)   
+# }
+# fn_delta_site(temp3)
+
+fn_delta_year <- function(df, pt_est1, var_est2, trt = NULL, age){
    #browser()
    df_delta_year <- df |> 
       group_by(study_area, species, {{trt}}) |>
       summarize(
-         mean_year = mean({{var1}}, na.rm = T),
-         var_year = sqrt(mean(dyear_var, na.rm = T)),
+         mean_year = mean({{pt_est1}}, na.rm = T),
+         var_year = sqrt(mean({{var_est2}}, na.rm = T)),
          ll_site = mean_year - var_year*1.96,
          ul_site = mean_year + var_year*1.96
       )
+   df_delta_year$age <- age
    return(df_delta_year)   
 }
-# fn_delta_site(temp3)
-
 
 
