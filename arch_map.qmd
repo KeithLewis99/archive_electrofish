@@ -22,6 +22,10 @@ str(coords)
 
 #### Map of electrofishing sites
 
+see Tech Report (Lewis et al. XXXX) for details
+
+weblink
+
 ```{r Site Map, message = FALSE, echo = FALSE, warning = FALSE}
 
 # years,
