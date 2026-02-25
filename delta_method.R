@@ -5,7 +5,13 @@
 # export_med is from the excel file df_summary_v1.xlsx where I compiled all of the data from the various reports and papers. This file focused on data in tables while Fig_data_juicr_extracted-v1.xlsx extrated data from tables and I copied this to export_med or export low depending on the quality of the data.
 ## I standardized the area for some of the studies (e.g., multiplied by 100 for those that were per 1 m2) and standardized the ages and species names. I also added a column for data type (density or biomass) and data quality (1-5). I will use this file to calculate the delta method estimates for all the studies that are ranked 2-5 in terms of data quality.
 
+# need to make sure that I am using the right density and biomass and assocaited variance/se throughout - what about dyear_var
+# check that the proper age is being filtered
+# make talbes
+# check against excel
+# check output tables
 library(dplyr)
+
 source("delta_function.R")
 
 
@@ -335,23 +341,26 @@ write.csv(df_2a_den_site, "output/jf_den_bootstrap_1993_1995.csv", row.names = F
 
 #### sites ----
 # get an SE for YOY
-df_3a_bio_yoy_year <- df_3a_bio_yoy |> 
-   group_by(study_area, year, species) |>
-   summarise(biomass_new = sum(biomass, na.rm = T),
-             biomass_se = sd(biomass, na.rm = T))
 
-df_3a_bio_yoy_year <- df_3a_bio_yoy_year |> select(year, species, biomass_new, biomass_se)
-df_3a_bio_yoy_year$age <- "YOY"
+df_2a_den_yoy_year <- df_2a_den_yoy1 |> 
+   group_by(study_area, year, species, trt) |>
+   summarise(density_new = sum(dsum, na.rm = T),
+             density_se = sd(dsum, na.rm = T))
 
-df_3a_bio_yoy_pds <- fn_delta_derivative_site(df_3a_bio_yoy_year,
-                                              biomass_se, 
-                                              "se")
-str(df_3a_bio_yoy_pds, give.attr = F)
-df_3a_bio_yoy_pds |> select(year, biomass_new, biomass_se, dsite_var)
+df_2a_den_yoy_year <- df_2a_den_yoy_year |> select(year, species, density_new, density_se, trt)
+df_2a_den_yoy_year$age <- "YOY"
 
-df_3a_bio_yoy_site <- fn_delta_site(df_3a_bio_yoy_pds, 
-                                    biomass_new,
-                                    biomass_se,
+df_2a_den_yoy_pds <- fn_delta_derivative_site(df_2a_den_yoy_year,
+                                              density_se, 
+                                              "se", 
+                                              trt = trt)
+str(df_2a_den_yoy_pds, give.attr = F)
+df_2a_den_yoy_pds |> select(year, density_new, density_se, dsite_var)
+
+df_2a_den_yoy_site <- fn_delta_site(df_2a_den_yoy_pds, 
+                                    density_new,
+                                    density_se,
+                                    trt = trt,
                                     age = "YOY"
                                     )
 # +1
@@ -374,6 +383,7 @@ write.csv(df_2a_den_site, "output/jf_den_year_bootstrap_193_1995.csv", row.names
 #### years ----
 # this converts se to var and does partial derivative
 ## this matches EXCEL
+
 df_2a_den_yoy_pdy <- 
    fn_delta_derivative_year(df_2a_den_yoy_site, 
                             se_site, 
@@ -471,7 +481,104 @@ df_2a_den_site <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site)
 write.csv(df_2a_den_site, "output/ws_den_year_bootstrap_1993.csv", row.names = F)
 
 
-## 3a ----
+
+### age-SJ ----
+unique(df_med2$study_area)
+df_2a_SJ <- df_med2 |> filter(
+   study_area == "St. John's")
+unique(df_2a_SJ$age_new)
+
+sj_2a_den_yoy <- fn_filterAge(df_2a_SJ, 
+                              data_den, 
+                              "2a", 
+                              age_new == "YOY")
+sj_2a_den_a1 <- fn_filterAge(df_2a_SJ, 
+                             data_den, 
+                             "2a", 
+                             age > 0 & age != "YOY") #& age != "YOY"
+
+
+# delta Age1 - density_new, d_se_new
+sj_2a_den_a1d <- fn_delta_Age(sj_2a_den_a1, 
+                              site, 
+                              density_new, 
+                              d_se_new,
+                              age = "1+")
+str(df_2a_den_a1d, give.attr = F)
+
+#bind and write
+sj_2a_den_yoy1 <- sj_2a_den_yoy |> select(study_area, year, species, site, density_new, d_se_new, dll_new, dul_new, age) |>
+   rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
+
+
+df_2a_den_site <- rbind(sj_2a_den_yoy1, sj_2a_den_a1d[-5])
+write.csv(df_2a_den_site, "output/sj_den_bootstrap_1982_1985.csv", row.names = F)
+
+#### sites ----
+sj_2a_den_yoy_pds <- 
+   fn_delta_derivative_site(sj_2a_den_yoy1,
+                            dsum_var, 
+                            "var")
+str(df_2a_den_yoy_pds, give.attr = F)
+sj_2a_den_yoy_pds |> select(year, site, age, dsum, dsum_var, dsite_var)
+sj_2a_den_yoy_site <- fn_delta_site(sj_2a_den_yoy_pds, 
+                                    dsum,
+                                    dsum_var,
+                                    age = "YOY")
+
+# +1
+sj_2a_den_a1_pds <- fn_delta_derivative_site(sj_2a_den_a1d, 
+                                             dsum_var, 
+                                             "var")
+sj_2a_den_a1_site <- fn_delta_site(sj_2a_den_a1_pds, 
+                                   dsum, 
+                                   dsum_var, 
+                                   age = "1+")
+
+# bind and write
+sj_2a_den_site <- rbind(sj_2a_den_yoy_site, sj_2a_den_a1_site)
+write.csv(sj_2a_den_site, "output/sj_den_year_bootstrap_1983_1985.csv", row.names = F)
+
+
+#### years ----
+# this converts se to var and does partial derivative
+## this matches EXCEL
+sj_2a_den_yoy_pdy <- 
+   fn_delta_derivative_year(sj_2a_den_yoy_site, 
+                            se_site, 
+                            "se")
+#df_2b_d0pd |> select(year, species, trt, density_new, dyear_var)
+sj_2a_den_a1_pdy <- 
+   fn_delta_derivative_year(sj_2a_den_a1_site, 
+                            se_site, 
+                            "se")
+str(df_2a_den_a1_pdy, give.attr = F)
+
+# delta
+# this takes mean of density and variance
+sj_2a_den_yoy <- fn_delta_year(sj_2a_den_yoy_pdy, 
+                               mean_site,
+                               se_site, 
+                               age = "YOY")
+
+sj_2a_den_a1 <- fn_delta_year(sj_2a_den_a1_pdy, 
+                              mean_site,
+                              se_site, 
+                              age = "1+")
+
+# den
+sj_2a_den <- rbind(sj_2a_den_yoy, sj_2a_den_a1) |>
+   arrange(study_area)
+# biomass for CL is 3a
+# no biomass for Joe Farrell's
+write.csv(sj_2a_den, "output/sj_den_tot_bootstrap_1993_1995.csv", row.names = F)
+
+
+
+
+
+
+## 3a-CL ----
 ### age -  ----
 ### YOY
 df_3a_bio_yoy <- fn_filterAge(df_2a_CL, 
@@ -556,12 +663,99 @@ df_3a_bio
 write.csv(df_2a_den_site, "output/ws_bio_bootstrap_1993.csv", row.names = F)
 
 
+## 3a-Highlands ----
+
+df_3a_HL <- df_med2 |> filter(
+   study_area == "Highlands")
+### age -  ----
+### YOY
+df_HL3a_den_yoy <- fn_filterAge(df_3a_HL, 
+                              data_den, 
+                              "3a", 
+                              age_new == "YOY")
+df_HL3a_den_yoy <- df_HL3a_den_yoy |>
+   select(study_area, site, year, species, trt, density_new, d_se_new, age) |>
+   rename(density = density_new, density_se = d_se_new)
+
+
+### +1
+df_HL3a_den_a1 <- fn_filterAge(df_3a_HL, 
+                             data_den, 
+                             "3a", 
+                             age_new == ">=1+")
+df_HL3a_den_a1 <- df_HL3a_den_a1 |> select(study_area, site, year, species, trt, density_new)
+
+# average age
+df_HL3a_den_a1_d <- df_HL3a_den_a1 |> 
+   group_by(study_area, year, site, species, trt) |>
+   summarise(density = sum(density_new, na.rm = T),
+             density_se = sd(density_new, na.rm = T))
+df_HL3a_den_a1_d <- df_HL3a_den_a1_d |> select(year, species, trt, density, density_se)
+df_HL3a_den_a1_d$age <- "1+"
+
+
+# bind and write
+df_HL3a_den_site <- rbind(df_HL3a_den_yoy, df_HL3a_den_a1_d)
+write.csv(df_HL3a_den_site, "output/HL_den_age_bootstrap_2002.csv", row.names = F)
+
+
+### site ----
+## yoy - dplyr
+
+df_HL3a_den_yoy_site <- df_HL3a_den_yoy |>
+   group_by(study_area, year, species, trt) |>
+   summarise(density_new = mean(density, na.rm = T), 
+             density_se = sd(density, na.rm = T))
+df_HL3a_den_yoy_site
+
+
+# a1
+df_HL3a_den_a1_pdy <- 
+   fn_delta_derivative_site(df_HL3a_den_a1_d,
+                            density_se, 
+                            "se",
+                            trt = trt)
+df_HL3a_den_a1 <- fn_delta_site(df_HL3a_den_a1_pdy, 
+                              density,
+                              density_se,
+                              age = "1+")
+
+# bind and write
+df_HL3a_den_site <- rbind(df_HL3a_den_yoy_site, df_HL3a_den_a1)
+write.csv(df_HL3a_den_site, "output/HL_den_site_bootstrap_2002.csv", row.names = F)
+
+### year ----
+## this matches EXCEL
+df_HL3a_den_yoy_pdy <- 
+   fn_delta_derivative_year(df_HL3a_den_yoy_site, 
+                            density_se, 
+                            "se")
+
+df_HL3a_den_yoy <- fn_delta_year(df_HL3a_den_yoy_pdy, 
+                               density_new,
+                               density_se,
+                               age = "YOY")
+
+df_HL3a_den_a1_pdy <- 
+   fn_delta_derivative_year(df_HL3a_den_a1, 
+                            se_site, 
+                            "se")
+
+df_HL3a_den_a1 <- fn_delta_year(df_HL3a_den_a1_pdy, 
+                              mean_site,
+                              se_site,
+                              age = "1+")
+
+df_HL3a_den <- rbind(df_HL3a_den_yoy, df_HL3a_den_a1)
+df_3a_den
+
+write.csv(df_HL3a_den, "output/HL_den_bootstrap_2002.csv", row.names = F)
 
 
 ## 3b ----
 ### age - Trepassey ----
 ## there is only 3b for Trepassy so the below works.
-df_3b_den_yoy <- fn_filterAge(df_med2, 
+temp <- fn_filterAge(df_med2, 
                               data_den, 
                               "3b", 
                               age == 0)
@@ -633,6 +827,14 @@ write.csv(df_3b_year_den, "output/trep__bootstrap__den_1994_1996.csv", row.names
 df_3b_year_bio <- rbind(df_3b_yr_yoy_b, df_3b_year_bio_a1)
 write.csv(df_3b_year_bio, "output/trep__bootstrap_bio_1994_1996.csv", row.names = F)
 
+### SJ pool ----
+### age - Trepassey ----
+## there is only 3b for Trepassy so the below works.
+df_3b_SJ <- df_med2 |> filter(
+   study_area == "St. John's" & trt == "Pool")
+
+df_3b_SJ <- df_3b_SJ |> select(study_area, year, species, density_new, dll_new, dul_new, biomass_new, bll_new, bul_new, age_new)
+write.csv(df_3b_year_bio, "output/SJ__bootstrap_1995_1996.csv", row.names = F)
 
 # Low ----
 ## import data ----
@@ -681,7 +883,41 @@ df_2a_den <- fn_delta_year(df_2c_den_pdy, mean_site)
 
 str(df_2a_den_a1_pdy, give.attr = F)
 
+## write and bind
 
+### age - JumpB ----
+df_2c_JumpB <- df_med2 |> filter(
+   study_area == "Jumpers Brook")
+
+
+### sites ----
+df_JB2c_den_pds <- 
+   fn_delta_derivative_site(df_2c_JumpB, 
+                            d_se, 
+                            "se")
+
+df_JB2c_den_site <- fn_delta_site(df_JB2c_den_pds, 
+                                  density,
+                                  d_se,
+                                  age = "all")
+
+
+### years ----
+# this converts se to var and does partial derivative
+## this matches EXCEL
+df_JB2c_den_pdy <- 
+   fn_delta_derivative_year(df_JB2c_den_site, 
+                                          se_site, 
+                                          "se")
+df_JB2c_den <- fn_delta_year(df_JB2c_den_pdy, 
+                           mean_site,
+                           se_site,
+                           age = "all")
+
+str(df_JB2c_den, give.attr = F)
+
+## write and bind
+write.csv(df_JB2c_den, "output/JB2c__bootstrap_2017_2018.csv", row.names = F)
 
 ## 4 -----
 ### Corner Brook (behind copper lake), Indian Bay, Gander River
