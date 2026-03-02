@@ -6,6 +6,7 @@
 #https://stackoverflow.com/questions/38554383/bootstrapped-confidence-intervals-with-dplyr
 library(Hmisc)
 library(dplyr)
+library(tidyr)
 
 # Stoney Brook ----
 ## import ----
@@ -27,6 +28,7 @@ df_sum <- df_sb |>
    group_by(Year, Species, Station, Area) |>
    summarise(bio.sum = sum(Weight.g, na.rm = T), abun = n()) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
+write.csv(df_sum, "output/SB_disagg_2001_2003.csv", row.names = F)
 
 
 ## boostrap ----
@@ -46,7 +48,8 @@ sb.boot.ci <- full_join(spp.den.boot.ci, spp.bio.boot.ci, by = c("Year", "Specie
    rename(density = mean.x, den.ll = ll.x, den.ul = ul.x,
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 sb.boot.ci
-write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_ci_2001_2003.csv", row.names = F)
+#write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_ci_2001_2003.csv", row.names = F)
+write.csv(sb.boot.ci, "output/SB_boot_ci_agg_2001_2003.csv", row.names = F)
 
 ### agg year ----
 spp.den.boot.year.ci <- df_sum |> 
@@ -64,7 +67,8 @@ sb.boot.year.ci <- full_join(spp.den.boot.year.ci, spp.bio.boot.year.ci, by = c(
    rename(density = mean.x, den.ll = ll.x, den.ul = ul.x,
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 sb.boot.year.ci
-write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_year_ci_2001_2003.csv", row.names = F)
+# write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_year_ci_2001_2003.csv", row.names = F)
+write.csv(sb.boot.year.ci, "output/SB_boot_ci_yr_agg_2001_2003.csv", row.names = F)
 
 
 
@@ -125,7 +129,7 @@ df_HLTP$Weight.g <- as.numeric(df_HLTP$Weight.g)
 
 ## add area ----
 # create pivot table to show blanks
-library(tidyr)
+
 df_HLTP |>
    group_by(Study_area, Year, Stn_no) |> 
    summarise(area = mean(Area)) |>
@@ -191,7 +195,7 @@ df_tp_spp_yr_stn <- df_tp |>
    group_by(Year, Species, Stn_no, Area) |>
    summarise(bio.sum = sum(Weight.g, na.rm = T), abun = n()) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
-
+write.csv(df_tp_spp_yr_stn, "output/TP_disagg_2012_2018.csv", row.names = F)
 
 # den
 spp.den.tp.boot.ci <- df_tp_spp_yr_stn |> 
@@ -213,7 +217,7 @@ tp.boot.ci
 
 df_tp_spp_yr_stn |> filter(Year == "2016" & Species == "BTY") # NA's for this filter are bc no other fish caught
 
-write.csv(tp.boot.ci, "output/TP_bootstrap_ci_2012_2018.csv", row.names = F)
+write.csv(tp.boot.ci, "output/TP_boot_ci_agg_2012_2018.csv", row.names = F)
 
 ### agg year ----
 spp.den.tp.year.boot.ci <- df_tp_spp_yr_stn |> 
@@ -232,7 +236,7 @@ tp.year.boot.ci <- full_join(spp.den.tp.year.boot.ci, spp.bio.tp.year.boot.ci, b
    rename(density = mean.x, den.ll = ll.x, den.ul = ul.x,
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 tp.year.boot.ci
-write.csv(tp.year.boot.ci, "output/TP_year_bootstrap_ci_2012_2018.csv", row.names = F)
+write.csv(tp.year.boot.ci, "output/TP_boot_ci_yr_agg_2012_2018.csv", row.names = F)
 
 
 # Highlands ----
@@ -242,7 +246,7 @@ df_hl_spp_yr_stn <- df_hl |>
    group_by(Year, Species, Stn_no, Area) |>
    summarise(bio.sum = sum(Weight.g, na.rm = T), abun = n()) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
-
+write.csv(df_hl_spp_yr_stn, "output/HL_disagg_2013_2019.csv", row.names = F)
 
 # den
 spp.den.hl.boot.ci <- df_hl_spp_yr_stn |> 
@@ -262,7 +266,7 @@ hl.boot.ci <- full_join(spp.den.hl.boot.ci, spp.bio.hl.boot.ci, by = c("Year", "
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 hl.boot.ci
 
-write.csv(hl.boot.ci, "output/hl_bootstrap_ci_2012_2018.csv", row.names = F)
+write.csv(hl.boot.ci, "output/hl_boot_ci_agg_2012_2018.csv", row.names = F)
 
 ### agg year ----
 spp.den.hl.year.boot.ci <- df_hl_spp_yr_stn |> 
@@ -281,6 +285,6 @@ hl.year.boot.ci <- full_join(spp.den.hl.year.boot.ci, spp.bio.hl.year.boot.ci, b
    rename(density = mean.x, den.ll = ll.x, den.ul = ul.x,
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 hl.year.boot.ci
-write.csv(hl.year.boot.ci, "output/hl_year_bootstrap_ci_2012_2018.csv", row.names = F)
+write.csv(hl.year.boot.ci, "output/hl_boot_ci_yr_agg_2012_2018.csv", row.names = F)
 
 # End ----
