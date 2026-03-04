@@ -121,3 +121,10 @@ kbl(temp1[, c(9, 1:7)],
    add_header_above(header = c(" " = 2, "Density" = 3, "Biomass" = 3)) |>
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
+
+
+# WTF is this????
+SJ__bootstrap_1995_1996
+
+
+# END ----
