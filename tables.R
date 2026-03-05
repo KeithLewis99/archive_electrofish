@@ -2,6 +2,7 @@
 
 # load packages
 library(dplyr)
+library(kableExtra)
 
 # disagg ---- 
 ## load files ----
@@ -35,18 +36,23 @@ SB_disagg_2001_2003 <- SB_disagg_2001_2003 |> rename(Stn_no = Station)
 temp <- rbind(HL_disagg_2013_2019,
               SB_disagg_2001_2003,
               TP_disagg_2012_2018)
-
+temp$Area <- round(temp$Area, 1)
+temp$abun.stand <- round(temp$abun.stand, 2)
+temp$bio.sum <- round(temp$bio.sum, 1)
+temp$bio.stand <- round(temp$bio.stand, 2)
 
 library(kableExtra)
-kbl(temp[, c(10, 1:4, 6, 7, 5, 8)], 
+tab_test <- kbl(temp[, c(10, 1:4, 6, 7, 5, 8)], 
     col.names = c('Study_area', 'Year', 'Species', 'Station', 'Area',
-                  'biomass', 'abundance', 'density', 'biomass/area'),
-    align = 'c', caption = "Density and Biomass by Station", digits = 3 ) |>
+                  'abundance', 'density', 'biomass', 'biomass/area'),
+    align = 'c', caption = "Density and Biomass by Station", digits = 3, booktabs = TRUE, longtable = TRUE) |>
    collapse_rows(valign = "top",
                  latex_hline = "major") |>
    add_header_above(header = c(" " = 5, "Density" = 2, "Biomass" = 2)) |>
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
+
+save_kable(tab_test, file = "my_table.html")
 
 
 # load files ----
@@ -81,8 +87,8 @@ temp <- rbind(hl_boot_ci_agg_2012_2018,
               TP_boot_ci_agg_2012_2018)
 
 
-library(kableExtra)
-kbl(temp[, c(10, 1:8)], 
+
+tab_agg <- kbl(temp[, c(10, 1:8)], 
     col.names = c('Study_area', 'Year', 'Species', 
                   'density', '2.5%', '97.5%',
                   'biomass', '2.5%', '97.5%'),
@@ -93,7 +99,7 @@ kbl(temp[, c(10, 1:8)],
 #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-
+save_kable(tab_agg, file = "tab_agg.html")
 
 # yr-agg ----
 hl_boot_ci_yr_agg_2012_2018$type <- "yr_agg"
@@ -111,7 +117,7 @@ temp1 <- rbind(hl_boot_ci_yr_agg_2012_2018,
 
 
 library(kableExtra)
-kbl(temp1[, c(9, 1:7)], 
+tab_yr_agg <- kbl(temp1[, c(9, 1:7)], 
     col.names = c('Study_area', 'Species', 
                   'mean', '2.5%', '97.5%',
                   'mean', '2.5%', '97.5%'),
@@ -122,6 +128,7 @@ kbl(temp1[, c(9, 1:7)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
+save_kable(tab_yr_agg, file = "tab_yr_agg.html")
 
 # WTF is this????
 SJ__bootstrap_1995_1996
