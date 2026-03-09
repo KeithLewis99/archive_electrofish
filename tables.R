@@ -8,11 +8,11 @@ library(kableExtra)
 ## disagg ---- 
 ### load files ----
 # create pattern
-temp1 = list.files(path = "output", pattern=".+disagg.+.csv$", full.names = T)
+temp1 = list.files(path = "data_derived/boot", pattern=".+disagg.+.csv$", full.names = T)
 
 # read all files in a folder that match a pattern and name each one
 name_files = function(x) {
-   name = gsub(".*output/", "", x)
+   name = gsub(".*data_derived/boot/", "", x)
    name = gsub(".csv$", "", paste0(name, ""))
    return(name)
 }
@@ -42,36 +42,36 @@ temp$abun.stand <- round(temp$abun.stand, 2)
 temp$bio.sum <- round(temp$bio.sum, 1)
 temp$bio.stand <- round(temp$bio.stand, 2)
 
-library(kableExtra)
+# make table
 tab_test <- kbl(temp[, c(10, 1:4, 6, 7, 5, 8)], 
     col.names = c('Study_area', 'Year', 'Species', 'Station', 'Area',
                   'abundance', 'density', 'biomass', 'biomass/area'),
-    align = 'c', caption = "Density and Biomass by Station", digits = 3, booktabs = TRUE, longtable = TRUE) |>
+    align = 'c', caption = "Density and Biomass (bootstrap) by Station", digits = 3, booktabs = TRUE, longtable = TRUE) |>
    collapse_rows(valign = "top",
                  latex_hline = "major") |>
    add_header_above(header = c(" " = 5, "Density" = 2, "Biomass" = 2)) |>
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab_test, file = "my_table.html")
+save_kable(tab_test, file = "output/tab_bootstrap_age_HL_SB_TP.html")
 
 
 ### load files ----
 # create pattern
-temp1 = list.files(path = "output", pattern=".+boot.+.csv$", full.names = T)
+temp1 = list.files(path = "data_derived/boot", pattern=".+boot.+.csv$", full.names = T)
 
 # read all files in a folder that match a pattern and name each one
 name_files = function(x) {
-   name = gsub(".*output/", "", x)
+   name = gsub(".*data_derived/boot/", "", x)
    name = gsub(".csv$", "", paste0(name, ""))
    return(name)
 }
 
 # create a list of dataframes, change the subscript to a name, extract as dataframes
-ls_sc_ci1 = (lapply(temp1, read.csv))
-names(ls_sc_ci1) <- name_files(temp1)
-list2env(ls_sc_ci1, envir = .GlobalEnv)
-str(ls_sc_ci1, 1)
+ls_site = (lapply(temp1, read.csv))
+names(ls_site) <- name_files(temp1)
+list2env(ls_site, envir = .GlobalEnv)
+str(ls_site, 1)
 
 # augment
 hl_boot_site_2012_2018$type <- "agg"
@@ -100,9 +100,10 @@ tab_agg <- kbl(temp[, c(10, 1:8)],
 #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab_agg, file = "tab_agg.html")
+save_kable(tab_agg, file = "output/tab_boot_site_HL_SB_TP.html")
 
 ## yr-agg ----
+
 hl_boot_yr_2012_2018$type <- "yr_agg"
 SB_boot_yr_2001_2003$type <- "yr_agg"
 TP_boot_yr_2012_2018$type <- "yr_agg"
@@ -128,7 +129,7 @@ tab_yr_agg <- kbl(temp1[, c(9, 1:7)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab_yr_agg, file = "tab_yr_agg.html")
+save_kable(tab_yr_agg, file = "output/tab_boot_yr_HL_SB_TP.html")
 
 
 ################# WTF is this????###########
@@ -136,13 +137,13 @@ SJ__bootstrap_1995_1996
 
 
 # delta ----
-### 2b load files ----
+### load files ----
 # create pattern
-temp1 = list.files(path = "output", pattern=".+age.+.csv$", full.names = T)
+temp1 = list.files(path = "data_derived", pattern=".+age.+.csv$", full.names = T)
 
 # read all files in a folder that match a pattern and name each one
 name_files = function(x) {
-   name = gsub(".*output/", "", x)
+   name = gsub(".*data_derived/", "", x)
    name = gsub(".csv$", "", paste0(name, ""))
    return(name)
 }
@@ -153,6 +154,7 @@ names(ls_delta_ageagg) <- name_files(temp1)
 list2env(ls_delta_ageagg, envir = .GlobalEnv)
 str(ls_delta_ageagg, 1)
 
+### TP ----
 tp_bio_delta_age_1984_1996 <- tp_bio_delta_age_1984_1996 |>
    rename(biomass = dsum,
           bio_var = dsum_var,
@@ -167,6 +169,7 @@ tp_den_delta_age_1984_1996 <- tp_den_delta_age_1984_1996 |>
           den_ul = ul_site)
 
 
+
 common <- intersect(names(tp_bio_delta_age_1984_1996), 
                     names(tp_den_delta_age_1984_1996)
                     )
@@ -174,8 +177,23 @@ out <- bind_cols(tp_den_delta_age_1984_1996,
                  tp_bio_delta_age_1984_1996 %>% 
                     select(-all_of(common)))
 
+tp_pool_delta_age_1984_1996$trt <- "pool"
+tp_pool_delta_age_1984_1996 <- tp_pool_delta_age_1984_1996 |>
+   rename(den_var = density_se,
+          bio_var = biomass_se)
 
-tab2b_ageagg <- kbl(out[, c(1:4, 9, 5, 7:8, 10, 12:13)], 
+
+keys <- c("study_area", "year", "species", "trt", "age")
+
+res <- out %>%
+   # out already has density/biomass + CI/var; keep it as the primary table
+   full_join(
+      tp_pool_delta_age_1984_1996 %>%
+         select(all_of(keys)), 
+      by = keys
+   )
+
+tab2b_ageagg <- kbl(res[, c(1:4, 9, 5, 7:8, 10, 12:13)], 
                   col.names = c('Study_area', 'Year', 'Species', 'trt', 'age',
                                 'mean', '2.5%', '97.5%',
                                 'mean', '2.5%', '97.5%'),
@@ -186,14 +204,11 @@ tab2b_ageagg <- kbl(out[, c(1:4, 9, 5, 7:8, 10, 12:13)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab2b_ageagg, file = "tab_yr_agg.html")
+save_kable(tab2b_ageagg, file = "output/tab_tp_age.html")
 
 
-
-### 2a load files ----
-# create pattern
+### CL ----
 str(ls_delta_ageagg, 1)
-
 cl_den_delta_age_1993_1995 <- cl_den_delta_age_1993_1995 |>
    rename(density = dsum,
           den_var = dsum_var,
@@ -225,25 +240,25 @@ tab2a_ageagg <- kbl(out[, c(1:4, 9, 5, 7:8, 10, 12:13)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab2a_ageagg, file = "tab_2aCL_yr_agg.html")
+save_kable(tab2a_ageagg, file = "output/tab_2aCL_age_agg.html")
 
 
-# WS 1992 ----
+### WS 1992 ----
 ws_den_delta_age_1992 <- ws_den_delta_age_1992 |>
    rename(density = dsum,
           den_var = dsum_var,
           den_ll = ll_site,
           den_ul = ul_site)
 
-WS_bio_delta_age_1992 <- WS_bio_delta_age_1992 |>
+ws_bio_delta_age_1992 <- ws_bio_delta_age_1992 |>
    mutate(bio_ll = biomass - 1.96*biomass_se,
           bio_ul = biomass + 1.96*biomass_se)
 
 common <- intersect(names(ws_den_delta_age_1992), 
-                    names(WS_bio_delta_age_1992)
+                    names(ws_bio_delta_age_1992)
 )
 out <- bind_cols(ws_den_delta_age_1992,
-                 WS_bio_delta_age_1992 %>% 
+                 ws_bio_delta_age_1992 %>% 
                     select(-all_of(common)))
 
 tab2a_WSage <- kbl(out[, c(1:4, 9, 5, 7:8, 11, 13:14)], 
@@ -257,7 +272,43 @@ tab2a_WSage <- kbl(out[, c(1:4, 9, 5, 7:8, 11, 13:14)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab2a_WSage, file = "tab_2aWS_age.html")
+save_kable(tab2a_WSage, file = "output/tab_2aWS_age.html")
 
-# Highlands
+### HL & JF ----
+
+jf_den_delta_age_1993_1995 <- jf_den_delta_age_1993_1995 |>
+   rename(density = dsum,
+          den_var = dsum_var,
+          den_ll = ll_site,
+          den_ul = ul_site)
+
+HL_den_delta_age_2002 <- HL_den_delta_age_2002 |>
+   mutate(den_ll = density - 1.96*density_se,
+         den_ul = density + 1.96*density_se)
+
+keys <- c("study_area", "year", "species", "trt", "age")
+
+res <- jf_den_delta_age_1993_1995 %>%
+   # out already has density/biomass + CI/var; keep it as the primary table
+   full_join(
+      HL_den_delta_age_2002 %>%
+         select(all_of(keys)), 
+      by = keys
+   )
+
+tab2b_HL_JF <- kbl(res[, c(1:5, 10, 6, 8:9)], 
+                    col.names = c('Study_area', 'Year', 'Species', 'site' , 'trt', 'age',
+                                  'mean', '2.5%', '97.5%'),
+                    align = 'c', caption = "Joe Farrells (1993-95) and Highlands (2002): Density and Biomass CIs", digits = 3 ) |>
+   collapse_rows(valign = "top",
+                 latex_hline = "major") |>
+   add_header_above(header = c(" " = 6, "Density" = 3)) |>
+   #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+   kable_paper()
+
+save_kable(tab2b_HL_JF, file = "output/tab_HL_JF_age.html")
+
+
+
+
 # END ----
