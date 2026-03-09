@@ -84,6 +84,7 @@ unique(df_med2$species)
 
 ### 2b density ----
 # SUM DENSITY, BIOMASS, AND VARIANCES
+# no site information
 str(df_med2)
 # filter YOY with test
 # test <- df_med2 |>
@@ -94,6 +95,7 @@ df_2b_den_yoy <- fn_filterAge(df_med2,
                               data_den, 
                               "2b", 
                               age == 0)
+str(df_2b_den_yoy)
 df_2b_den_a1 <- fn_filterAge(df_med2, 
                              data_den, 
                              "2b", 
@@ -113,8 +115,8 @@ df_2b_den_yoy1 <- df_2b_den_yoy |>
    rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
 
 #bind and write
-df_2b_den_site <- rbind(df_2b_den_yoy1, df_2b_den_a1_d)
-write.csv(df_2b_den_site, "output/TP_den_delta_1984_1996.csv", row.names = F)
+df_2b_den_age <- rbind(df_2b_den_yoy1, df_2b_den_a1_d)
+write.csv(df_2b_den_age, "output/tp_den_delta_age_1984_1996.csv", row.names = F)
 
 
 # year: partial derivaties
@@ -143,8 +145,8 @@ df_2b_a1_den_yr <- fn_delta_year(df_2b_den_a1_pdy,
 
 
 #bind and write
-df_2b_den <- rbind(df_2b_yoy_den_yr, df_2b_a1_den_yr)
-write.csv(df_2b_den, "output/tp_den_delta_yr_agg_1984_1996.csv", row.names = F)
+df_2b_den_yr <- rbind(df_2b_yoy_den_yr, df_2b_a1_den_yr)
+write.csv(df_2b_den_yr, "output/tp_den_delta_yr_1984_1996.csv", row.names = F)
 
 # this matches EXCEL -          
 
@@ -174,7 +176,7 @@ df_2b_bio_yoy <- df_2b_bio_yoy |>
    rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
 
 df_2b_bio_age <- rbind(df_2b_bio_yoy, df_2b_bio_da1)
-write.csv(df_2b_bio_age, "output/tp_bio_delta_1984_1996.csv", row.names = F)
+write.csv(df_2b_bio_age, "output/tp_bio_delta_age_1984_1996.csv", row.names = F)
 
 
 # year: partial derivaties
@@ -203,9 +205,9 @@ df_2b_bio_a1_yr <- fn_delta_year(df_2b_bio_a1_pdy,
                                  age = "1+")
 
 # biomass
-df_2b_bio <- rbind(df_2b_bio_yoy_yr, df_2b_bio_a1_yr)
+df_2b_bio_yr <- rbind(df_2b_bio_yoy_yr, df_2b_bio_a1_yr)
 
-write.csv(df_2b_bio, "output/tp_bio_delta_ yr_agg_1984_1996.csv", row.names = F)
+write.csv(df_2b_bio_yr, "output/tp_bio_delta_yr_1984_1996.csv", row.names = F)
 
 
 
@@ -242,8 +244,8 @@ df_2a_den_yoy1 <- df_2a_den_yoy |> select(study_area, year, species, stations, d
    rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
 
 
-df_2a_den_site <- rbind(df_2a_den_yoy1, df_2a_den_a1d[,-5])
-write.csv(df_2a_den_site, "output/cl_den_delta_1993_1995.csv", row.names = F)
+df_2a_den_age <- rbind(df_2a_den_yoy1, df_2a_den_a1d[,-5])
+write.csv(df_2a_den_age, "output/cl_den_delta_age_1993_1995.csv", row.names = F)
 
 #### sites ----
 df_2a_den_yoy_pds <- 
@@ -268,7 +270,7 @@ df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds,
 
 # bind and write
 df_2a_den_site <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site)
-write.csv(df_2a_den_site, "output/cl_den_delta_agg_1993_1995.csv", row.names = F)
+write.csv(df_2a_den_site, "output/cl_den_delta_site_1993_1995.csv", row.names = F)
 
 
 #### years ----
@@ -298,11 +300,11 @@ df_2a_den_a1 <- fn_delta_year(df_2a_den_a1_pdy,
                               age = "1+")
 
 # den
-df_2a_den <- rbind(df_2a_den_yoy, df_2a_den_a1) |>
+df_2a_den_yr <- rbind(df_2a_den_yoy, df_2a_den_a1) |>
    arrange(study_area)
 # biomass for CL is 3a
 # no biomass for Joe Farrell's
-write.csv(df_2a_den, "output/cl_den_delta_yr_agg_1993_1995.csv", row.names = F)
+write.csv(df_2a_den_yr, "output/cl_den_delta_yr_1993_1995.csv", row.names = F)
 
 
 
@@ -336,8 +338,8 @@ df_2a_den_yoy1 <- df_2a_den_yoy |> select(study_area, year, species, site, trt, 
    rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
 
 
-df_2a_den_site <- rbind(df_2a_den_yoy1, df_2a_den_a1d)
-write.csv(df_2a_den_site, "output/jf_den_delta_disagg_1993_1995.csv", row.names = F)
+df_2a_den_age <- rbind(df_2a_den_yoy1, df_2a_den_a1d)
+write.csv(df_2a_den_age, "output/jf_den_delta_age_1993_1995.csv", row.names = F)
 
 
 #### sites ----
@@ -378,7 +380,7 @@ df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds,
 
 # bind and write
 df_2a_den_site <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site)
-write.csv(df_2a_den_site, "output/jf_den_delta_agg_1993_1995.csv", row.names = F)
+write.csv(df_2a_den_site, "output/jf_den_delta_site_1993_1995.csv", row.names = F)
 
 
 #### years ----
@@ -412,11 +414,11 @@ df_2a_den_a1 <- fn_delta_year(df_2a_den_a1_pdy,
                               age = "1+")
 
 # den
-df_2a_den <- rbind(df_2a_den_yoy, df_2a_den_a1) |>
+df_2a_den_yr <- rbind(df_2a_den_yoy, df_2a_den_a1) |>
    arrange(study_area)
 # biomass for CL is 3a
 # no biomass for Joe Farrell's
-write.csv(df_2a_den, "output/jf_den_delta_yr_agg_1993_1995.csv", row.names = F)
+write.csv(df_2a_den_yr, "output/jf_den_delta_yr_1993_1995.csv", row.names = F)
 
 
 ### age - WS ----
@@ -450,8 +452,8 @@ df_2a_den_yoy1 <- df_2a_den_yoy |> select(study_area, year, species, site, densi
    rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
 
 
-df_2a_den_site <- rbind(df_2a_den_yoy1, df_2a_den_a1d[,-5])
-write.csv(df_2a_den_site, "output/ws_den_delta_disagg_1992.csv", row.names = F)
+df_2a_den_age <- rbind(df_2a_den_yoy1, df_2a_den_a1d[,-5])
+write.csv(df_2a_den_age, "output/ws_den_delta_age_1992.csv", row.names = F)
 
 #### sites ----
 df_2a_den_yoy_pds <- 
@@ -460,6 +462,7 @@ df_2a_den_yoy_pds <-
                             "se"
                             )
 str(df_2a_den_yoy_pds, give.attr = F)
+
 df_2a_den_yoy_pds |> select(year, site, age_new, density_new, d_se_new, dsite_var)
 df_2a_den_yoy_site <- fn_delta_site(df_2a_den_yoy_pds, 
                                     density,
@@ -478,8 +481,8 @@ df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds,
 
 
 # bind and write
-df_2a_den_site <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site)
-write.csv(df_2a_den_site, "output/ws_den_delta_yr_agg_1993.csv", row.names = F)
+df_2a_den_year <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site)
+write.csv(df_2a_den_year, "output/ws_den_delta_yr_1993.csv", row.names = F)
 
 
 
@@ -512,8 +515,8 @@ sj_2a_den_yoy1 <- sj_2a_den_yoy |> select(study_area, year, species, site, densi
    rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
 
 
-df_2a_den_site <- rbind(sj_2a_den_yoy1, sj_2a_den_a1d[-5])
-write.csv(df_2a_den_site, "output/sj_den_delta_diagg_1982_1985.csv", row.names = F)
+df_2a_den_age <- rbind(sj_2a_den_yoy1, sj_2a_den_a1d[-5])
+write.csv(df_2a_den_age, "output/sj_den_delta_age_1982_1985.csv", row.names = F)
 
 #### sites ----
 sj_2a_den_yoy_pds <- 
@@ -538,7 +541,7 @@ sj_2a_den_a1_site <- fn_delta_site(sj_2a_den_a1_pds,
 
 # bind and write
 sj_2a_den_site <- rbind(sj_2a_den_yoy_site, sj_2a_den_a1_site)
-write.csv(sj_2a_den_site, "output/sj_den_delta_agg_1983_1985.csv", row.names = F)
+write.csv(sj_2a_den_site, "output/sj_den_delta_site_1983_1985.csv", row.names = F)
 
 
 #### years ----
@@ -568,11 +571,11 @@ sj_2a_den_a1 <- fn_delta_year(sj_2a_den_a1_pdy,
                               age = "1+")
 
 # den
-sj_2a_den <- rbind(sj_2a_den_yoy, sj_2a_den_a1) |>
+sj_2a_den_yr <- rbind(sj_2a_den_yoy, sj_2a_den_a1) |>
    arrange(study_area)
 # biomass for CL is 3a
 # no biomass for Joe Farrell's
-write.csv(sj_2a_den, "output/sj_den_delta_yr_agg_1993_1995.csv", row.names = F)
+write.csv(sj_2a_den_yr, "output/sj_den_delta_yr_1993_1995.csv", row.names = F)
 
 
 
@@ -584,7 +587,7 @@ df_3a_bio_yoy <- fn_filterAge(df_2a_CL,
                               "3a", 
                               age_new == "YOY")
 df_3a_bio_yoy <- df_3a_bio_yoy |> 
-   select(study_area, stations, year, species, biomass_new, b_se_new, age) |>
+   select(study_area, year, species, stations, biomass_new, b_se_new, age) |>
    rename(biomass = biomass_new, biomass_se = b_se_new)
 
 
@@ -593,7 +596,7 @@ df_3a_bio_a1 <- fn_filterAge(df_2a_CL,
                              data_bio, 
                              "3a", 
                              age > 0 & age != "YOY")
-df_3a_bio_a1 <- df_3a_bio_a1 |> select(study_area, stations, year, species, biomass_new)
+df_3a_bio_a1 <- df_3a_bio_a1 |> select(study_area, year, species, stations, biomass_new)
 
 # average age
 df_3a_bio_a1_d <- df_3a_bio_a1 |> 
@@ -605,8 +608,8 @@ df_3a_bio_a1_d$age <- "1+"
 
 
 # bind and write
-df_3a_bio_site <- rbind(df_3a_bio_yoy, df_3a_bio_a1_d)
-write.csv(df_3a_bio_site, "output/cl_bio_delta_disagg_1993_1995.csv", row.names = F)
+df_3a_bio_age <- rbind(df_3a_bio_yoy, df_3a_bio_a1_d)
+write.csv(df_3a_bio_age, "output/cl_bio_delta_age_1993_1995.csv", row.names = F)
 
 
 ### site ----
@@ -631,7 +634,7 @@ df_3a_bio_a1 <- fn_delta_site(df_3a_bio_a1_pdy,
 
 # bind and write
 df_3a_bio_site <- rbind(df_3a_bio_yoy_site, df_3a_bio_a1)
-write.csv(df_3a_bio_site, "output/cl_bio_agg_1993_1995.csv", row.names = F)
+write.csv(df_3a_bio_site, "output/cl_bio_site_1993_1995.csv", row.names = F)
 
 ### year ----
 ## this matches EXCEL
@@ -655,16 +658,17 @@ df_3a_bio_a1 <- fn_delta_year(df_3a_bio_a1_pdy,
                                se_site,
                                age = "1+")
 
-df_3a_bio <- rbind(df_3a_bio_yoy, df_3a_bio_a1)
-df_3a_bio
+df_3a_bio_yr <- rbind(df_3a_bio_yoy, df_3a_bio_a1)
+df_3a_bio_yr
 
-write.csv(df_3a_bio, "output/cl_bio_delta_yr_agg_1993_1995.csv", row.names = F)
+write.csv(df_3a_bio_yr, "output/cl_bio_delta_yr_1993_1995.csv", row.names = F)
 
 
 ## 3a-Highlands ----
 
 df_3a_HL <- df_med2 |> filter(
    study_area == "Highlands")
+
 ### age -  ----
 ### YOY
 df_HL3a_den_yoy <- fn_filterAge(df_3a_HL, 
@@ -693,8 +697,8 @@ df_HL3a_den_a1_d$age <- "1+"
 
 
 # bind and write
-df_HL3a_den_site <- rbind(df_HL3a_den_yoy, df_HL3a_den_a1_d)
-write.csv(df_HL3a_den_site, "output/HL_den_delta_disagg_2002.csv", row.names = F)
+df_HL3a_den_age <- rbind(df_HL3a_den_yoy, df_HL3a_den_a1_d)
+write.csv(df_HL3a_den_age, "output/HL_den_delta_age_2002.csv", row.names = F)
 
 
 ### site ----
@@ -720,7 +724,7 @@ df_HL3a_den_a1 <- fn_delta_site(df_HL3a_den_a1_pdy,
 
 # bind and write
 df_HL3a_den_site <- rbind(df_HL3a_den_yoy_site, df_HL3a_den_a1)
-write.csv(df_HL3a_den_site, "output/HL_den_delta_agg_2002.csv", row.names = F)
+write.csv(df_HL3a_den_site, "output/HL_den_delta_site_2002.csv", row.names = F)
 
 ### year ----
 ## this matches EXCEL
@@ -744,13 +748,74 @@ df_HL3a_den_a1 <- fn_delta_year(df_HL3a_den_a1_pdy,
                               se_site,
                               age = "1+")
 
-df_HL3a_den <- rbind(df_HL3a_den_yoy, df_HL3a_den_a1)
+df_HL3a_den_yr <- rbind(df_HL3a_den_yoy, df_HL3a_den_a1)
 
-write.csv(df_HL3a_den, "output/HL_den_delta_yr_agg_2002.csv", row.names = F)
+write.csv(df_HL3a_den_yr, "output/HL_den_delta_yr_2002.csv", row.names = F)
+
+
+## WS biomass -----
+
+### age -  ----
+### YOY
+df_WS3a_bio_yoy <- fn_filterAge(df_2a_WS, 
+                                data_bio, 
+                                "3a", 
+                                age_new == "YOY")
+df_WS3a_bio_yoy <- df_WS3a_bio_yoy |>
+   select(study_area, site, year, species, trt, biomass_new, b_se_new, age) |>
+   rename(biomass = biomass_new, biomass_se = b_se_new)
+
+
+### +1
+df_WS3a_bio_a1 <- fn_filterAge(df_2a_WS, 
+                               data_bio, 
+                               "3a", 
+                               age_new == ">=1+")
+df_WS3a_bio_a1 <- df_WS3a_bio_a1 |> select(study_area, site, year, species, trt, biomass_new)
+
+# average age
+df_WS3a_bio_a1_d <- df_WS3a_bio_a1 |> 
+   group_by(study_area, year, site, species, trt) |>
+   summarise(biomass = sum(biomass_new, na.rm = T),
+             biomass_se = sd(biomass_new, na.rm = T))
+df_WS3a_bio_a1_d <- df_WS3a_bio_a1_d |> select(year, species, trt, biomass, biomass_se)
+df_WS3a_bio_a1_d$age <- "1+"
+
+
+# bind and write
+df_WS3a_bio_age <- rbind(df_WS3a_bio_yoy, df_WS3a_bio_a1_d)
+write.csv(df_WS3a_bio_age, "output/WS_bio_delta_age_1992.csv", row.names = F)
+
+
+### site ----
+## yoy - dplyr
+
+df_WS3a_bio_yoy_site <- df_WS3a_bio_yoy |>
+   group_by(study_area, year, species, trt) |>
+   summarise(biomass_new = mean(biomass, na.rm = T), 
+             biomass_se = sd(biomass, na.rm = T))
+df_WS3a_bio_yoy_site
+
+
+# a1
+df_WS3a_bio_a1_pdy <- 
+   fn_delta_derivative_site(df_WS3a_bio_a1_d,
+                            biomass_se, 
+                            "se",
+                            trt = trt)
+df_WS3a_bio_a1 <- fn_delta_site(df_WS3a_bio_a1_pdy, 
+                                biomass,
+                                biomass_se,
+                                age = "1+")
+
+# bind and write
+df_WS3a_bio_site <- rbind(df_WS3a_bio_yoy_site, df_WS3a_bio_a1)
+write.csv(df_WS3a_bio_site, "output/WS_bio_delta_site_1992.csv", row.names = F)
 
 
 ## 3b ----
-### age - Trepassey ----
+### age - Trepassey - pools ----
+### pools
 ## there is only 3b for Trepassy so the below works.
 df_3b_den_yoy <- fn_filterAge(df_med2, 
                               data_den, 
@@ -777,8 +842,8 @@ df_3b_den_a1_d$age <- "1+"
 df_3b_den_a1_d$age <- as.factor(df_3b_den_a1_d$age)
 
 # write and bind
-df_3b_year <- rbind(df_3b_den_yoy, df_3b_den_a1_d)
-write.csv(df_3b_year, "output/tp_delta_disagg_1984_1996.csv", row.names = F)
+df_3b_age <- rbind(df_3b_den_yoy, df_3b_den_a1_d)
+write.csv(df_3b_age, "output/tp_pool_delta_age_1984_1996.csv", row.names = F)
 
 
 # year for YOY
@@ -820,19 +885,21 @@ df_3b_yr_yoy_b <- df_3b_yr_yoy |>
 df_3b_den_a1_d
 df_3b_year_bio_a1
 df_3b_year_den <- rbind(df_3b_yr_yoy_d, df_3b_year_den_a1)
-write.csv(df_3b_year_den, "output/tp_den_delta__yr_agg_1984_1996.csv", row.names = F)
+write.csv(df_3b_year_den, "output/tp_pool_den_delta_yr_1984_1996.csv", row.names = F)
+
 df_3b_year_bio <- rbind(df_3b_yr_yoy_b, df_3b_year_bio_a1)
-write.csv(df_3b_year_bio, "output/tp_bio_delta_yr_agg_1984_1996.csv", row.names = F)
+write.csv(df_3b_year_bio, "output/tp_pool_bio_delta_yr_1984_1996.csv", row.names = F)
 
 
 ### SJ pool ----
-### age - Trepassey ----
 ## there is only 3b for Trepassy so the below works.
 df_3b_SJ <- df_med2 |> filter(
    study_area == "St. John's" & trt == "Pool")
 
 df_3b_SJ <- df_3b_SJ |> select(study_area, year, species, density_new, dll_new, dul_new, biomass_new, bll_new, bul_new, age_new)
-write.csv(df_3b_SJ, "output/SJ_delta_1995_1996.csv", row.names = F)
+write.csv(df_3b_SJ, "output/SJ_delta_yr_1995_1996.csv", row.names = F)
+
+
 
 # Low ----
 ## import data ----
