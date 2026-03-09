@@ -31,7 +31,7 @@ df_sum <- df_sb |>
 write.csv(df_sum, "output/SB_disagg_2001_2003.csv", row.names = F)
 
 
-## boostrap ----
+## bootstrap ----
 ### aggregate stations
 spp.den.boot.ci <- df_sum |> 
    group_by(Year, Species) |>
@@ -49,7 +49,7 @@ sb.boot.ci <- full_join(spp.den.boot.ci, spp.bio.boot.ci, by = c("Year", "Specie
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 sb.boot.ci
 #write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_ci_2001_2003.csv", row.names = F)
-write.csv(sb.boot.ci, "output/SB_boot_ci_agg_2001_2003.csv", row.names = F)
+write.csv(sb.boot.ci, "output/SB_boot_site_2001_2003.csv", row.names = F)
 
 ### agg year ----
 spp.den.boot.year.ci <- df_sum |> 
@@ -68,7 +68,7 @@ sb.boot.year.ci <- full_join(spp.den.boot.year.ci, spp.bio.boot.year.ci, by = c(
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 sb.boot.year.ci
 # write.csv(sb.boot.ci, "../data/stoneybrook/bootstrap_year_ci_2001_2003.csv", row.names = F)
-write.csv(sb.boot.year.ci, "output/SB_boot_ci_yr_agg_2001_2003.csv", row.names = F)
+write.csv(sb.boot.year.ci, "output/SB_boot_yr_2001_2003.csv", row.names = F)
 
 
 
@@ -217,7 +217,7 @@ tp.boot.ci
 
 df_tp_spp_yr_stn |> filter(Year == "2016" & Species == "BTY") # NA's for this filter are bc no other fish caught
 
-write.csv(tp.boot.ci, "output/TP_boot_ci_agg_2012_2018.csv", row.names = F)
+write.csv(tp.boot.ci, "output/TP_boot_site_2012_2018.csv", row.names = F)
 
 ### agg year ----
 spp.den.tp.year.boot.ci <- df_tp_spp_yr_stn |> 
@@ -236,7 +236,7 @@ tp.year.boot.ci <- full_join(spp.den.tp.year.boot.ci, spp.bio.tp.year.boot.ci, b
    rename(density = mean.x, den.ll = ll.x, den.ul = ul.x,
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 tp.year.boot.ci
-write.csv(tp.year.boot.ci, "output/TP_boot_ci_yr_agg_2012_2018.csv", row.names = F)
+write.csv(tp.year.boot.ci, "output/TP_boot_yr_2012_2018.csv", row.names = F)
 
 
 # Highlands ----
@@ -266,7 +266,7 @@ hl.boot.ci <- full_join(spp.den.hl.boot.ci, spp.bio.hl.boot.ci, by = c("Year", "
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 hl.boot.ci
 
-write.csv(hl.boot.ci, "output/hl_boot_ci_agg_2012_2018.csv", row.names = F)
+write.csv(hl.boot.ci, "output/hl_boot_site_2012_2018.csv", row.names = F)
 
 ### agg year ----
 spp.den.hl.year.boot.ci <- df_hl_spp_yr_stn |> 
@@ -285,6 +285,6 @@ hl.year.boot.ci <- full_join(spp.den.hl.year.boot.ci, spp.bio.hl.year.boot.ci, b
    rename(density = mean.x, den.ll = ll.x, den.ul = ul.x,
           biomass = mean.y, bio.ll = ll.y, bio.ul = ul.y)
 hl.year.boot.ci
-write.csv(hl.year.boot.ci, "output/hl_boot_ci_yr_agg_2012_2018.csv", row.names = F)
+write.csv(hl.year.boot.ci, "output/hl_boot_yr_2012_2018.csv", row.names = F)
 
 # End ----
