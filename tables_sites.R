@@ -52,7 +52,7 @@ out <- bind_cols(cl_den_delta_site_1993_1995,
                  cl_bio_site_1993_1995 %>% 
                     select(-all_of(common)))
 
-tab2a_siteagg <- kbl(out[, c(1:3, 8, 4, 6:7, 10, 12:13)], 
+tab2a_siteagg <- kbl(out[, c(1:3, 8, 4, 6:7, 9, 11:12)], 
                     col.names = c('Study_area', 'Year', 'Species', 'age',
                                   'mean', '2.5%', '97.5%',
                                   'mean', '2.5%', '97.5%'),
@@ -316,6 +316,6 @@ tab2b_HL_JF <- kbl(res[, c(1:5, 10, 6, 8:9)],
 
 save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
 
-
+### GG ----
 
 # END ----
