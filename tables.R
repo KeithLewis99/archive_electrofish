@@ -306,6 +306,30 @@ tab2b_HL_JF <- kbl(res[, c(1:5, 10, 6, 8:9)],
 save_kable(tab2b_HL_JF, file = "output/tab_HL_JF_age.html")
 
 
+# SJ ----
+   
+
+# GG ----
+GG_age_1995_1996
+
+GG_age_1995_1996 <- GG_age_1995_1996 |>
+   select("study_area", "year", "stations", 
+          "density_new", "dll_new", "dul_new",
+          "biomass_new", "bll_new", "bul_new"
+   )
+
+tab_GG_age_1995_1996 <- kbl(GG_age_1995_1996, 
+                   col.names = c('Study_area', 'Year', 'site',
+                                 'mean', '2.5%', '97.5%',
+                                 'mean', '2.5%', '97.5%'),
+                   align = 'c', caption = "Great Gull Brook (Gander) 1997-1998: Density and Biomass CIs", digits = 3 ) |>
+   collapse_rows(valign = "top",
+                 latex_hline = "major") |>
+   add_header_above(header = c(" " = 3, "Density" = 3, "Biomass" = 3)) |>
+   #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+   kable_paper()
+
+save_kable(tab_GG_age_1995_1996, file = "output/tab_GG_age_1995_1996.html")
 
 
 # END ----
