@@ -1112,7 +1112,7 @@ df_2a_den <- fn_delta_year(df_2c_den_pdy, mean_site, se_site, age = "all")
 str(df_2a_den_a1_pdy, give.attr = F)
 
 ## write and bind
-write.csv(df_2a_den, "data_derived/GG_year_1995_1996.csv", row.names = F)
+write.csv(df_2a_den, "data_derived/GG_yr_1995_1996.csv", row.names = F)
 
 
 ### age - JumpB ----
