@@ -53,7 +53,7 @@ tab_test <- kbl(temp[, c(10, 1:4, 6, 7, 5, 8)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab_test, file = "output/tab_bootstrap_age_HL_SB_TP.html")
+save_kable(tab_test, file = "output/tab_boot_age_HL_SB_TP.html")
 
 
 ### load files ----
@@ -131,9 +131,6 @@ tab_yr_agg <- kbl(temp1[, c(9, 1:7)],
 
 save_kable(tab_yr_agg, file = "output/tab_boot_yr_HL_SB_TP.html")
 
-
-################# WTF is this????###########
-SJ__bootstrap_1995_1996
 
 
 # delta ----
