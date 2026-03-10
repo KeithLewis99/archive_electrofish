@@ -316,6 +316,34 @@ tab2b_HL_JF <- kbl(res[, c(1:5, 10, 6, 8:9)],
 
 save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
 
+### 2c ----
 ### GG ----
+GG_site_1995_1996
+GG_yr_1995_1996 
+
+GG_yr_1995_1996$year <- "Both"
+GG_yr_1995_1996$species <- "salmonid"
+
+GG_yr_1995_1996 <- GG_yr_1995_1996 |>
+   select("study_area", "year", "species", "mean_year",  "ll_site",    "ul_site", "age") |>
+   rename(mean_site = mean_year)
+
+GG_den_age <- rbind(GG_site_1995_1996[,-5], GG_yr_1995_1996)
+
+
+# biomass
+
+
+tab2b_HL_JF <- kbl(res[, c(1:5, 10, 6, 8:9)], 
+                   col.names = c('Study_area', 'Year', 'Species', 'site' , 'trt', 'age',
+                                 'mean', '2.5%', '97.5%'),
+                   align = 'c', caption = "Joe Farrells (1993-95) and Highlands (2002): Density and Biomass CIs", digits = 3 ) |>
+   collapse_rows(valign = "top",
+                 latex_hline = "major") |>
+   add_header_above(header = c(" " = 6, "Density" = 3)) |>
+   #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+   kable_paper()
+
+save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
 
 # END ----
