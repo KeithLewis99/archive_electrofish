@@ -167,12 +167,15 @@ tp_den_delta_age_1984_1996 <- tp_den_delta_age_1984_1996 |>
 
 
 
-common <- intersect(names(tp_bio_delta_age_1984_1996), 
-                    names(tp_den_delta_age_1984_1996)
-                    )
-out <- bind_cols(tp_den_delta_age_1984_1996,
-                 tp_bio_delta_age_1984_1996 %>% 
-                    select(-all_of(common)))
+keys <- c("study_area", "year", "species", "age")
+
+res_trt <- tp_pool_delta_age_1984_1996 %>%
+   # out already has density/biomass + CI/var; keep it as the primary table
+   full_join(
+        tp_bio_delta_age_1984_1996%>%
+         select(all_of(keys)), 
+      by = keys
+   )
 
 tp_pool_delta_age_1984_1996$trt <- "pool"
 tp_pool_delta_age_1984_1996 <- tp_pool_delta_age_1984_1996 |>
@@ -182,7 +185,7 @@ tp_pool_delta_age_1984_1996 <- tp_pool_delta_age_1984_1996 |>
 
 keys <- c("study_area", "year", "species", "trt", "age")
 
-res <- out %>%
+res <- res_trt %>%
    # out already has density/biomass + CI/var; keep it as the primary table
    full_join(
       tp_pool_delta_age_1984_1996 %>%
@@ -307,7 +310,60 @@ save_kable(tab2b_HL_JF, file = "output/tab_HL_JF_age.html")
 
 
 # SJ ----
-   
+sj_den_delta_age_1982_1985
+sj_bio_delta_age_1982_1985
+sj_pool_delta_age_1995_1996
+
+
+sj_den_delta_age_1982_1985 <- sj_den_delta_age_1982_1985 |>
+   rename(density = dsum,
+          den_var = dsum_var,
+          den_ll = ll_site,
+          den_ul = ul_site)
+
+sj_bio_delta_age_1982_1985 <- sj_bio_delta_age_1982_1985 |>
+   rename(biomass = dsum,
+          bio_var = dsum_var,
+          bio_ll = ll_site,
+          bio_ul = ul_site)
+
+
+keys <- c("study_area", "year", "species", "site", "age")
+
+tmp <- left_join(sj_den_delta_age_1982_1985, 
+                 sj_bio_delta_age_1982_1985, 
+                 by = c("study_area", "year", "species", "site", "age"))
+tmp$trt <- "riffle"
+
+
+sj_pool_delta_age_1995_1996$trt <- "pool"
+
+sj_pool_delta_age_1995_1996 <- sj_pool_delta_age_1995_1996 |>
+   rename(density = density_new,
+          den_ll = dll_new,
+          den_ul = dul_new,
+          biomass = biomass_new,
+          bio_ll = bll_new,
+          bio_ul = bul_new,
+          age = age_new)
+
+res <- rbind(tmp[, -c(6,11)], sj_pool_delta_age_1995_1996)
+
+tab_SJ <- kbl(res[, c(1:4, 12, 8, 5:7, 9:11)], 
+                    col.names = c('Study_area', 'Year', 'Species', 
+                                  'site', 'trt', 'age',
+                                  'mean', '2.5%', '97.5%',
+                                  'mean', '2.5%', '97.5%'),
+                    align = 'c', caption = "St. John's (1982-1996): Density and Biomass CIs", digits = 3 ) |>
+   collapse_rows(valign = "top",
+                 latex_hline = "major") |>
+   add_header_above(header = c(" " = 6, "Density" = 3, "Biomass" = 3)) |>
+   kable_paper()
+
+save_kable(tab_SJ, file = "output/tab_SJ_age.html")
+
+
+
 
 # GG ----
 GG_age_1995_1996
@@ -331,6 +387,38 @@ tab_GG_age_1995_1996 <- kbl(GG_age_1995_1996,
 
 save_kable(tab_GG_age_1995_1996, file = "output/tab_GG_age_1995_1996.html")
 
+# JB ----
+#Not aggregated - this is the data in raw form
+
+tab_JB_age_2017_2018 <- kbl(JB_age_2017_2018[, c(1:2, 4, 6, 8:9)], 
+                            col.names = c('Study_area', 'Year', 'site',
+                                          'mean', '2.5%', '97.5%'
+                                          ),
+                            align = 'c', caption = "Jumper's Brook (2017-2018: Density CIs", digits = 3 ) |>
+   collapse_rows(valign = "top",
+                 latex_hline = "major") |>
+   add_header_above(header = c(" " = 3, "Density" = 3)) |>
+   kable_paper()
+
+save_kable(tab_JB_age_2017_2018, file = "output/tab_JB_age_2017_2018.html")
+
+
+
 # 4 ----
+CB_IB_GB_age_2000
+
+tmp <- CB_IB_GB_age_2000 |>
+   group_by(study_area, species) |>
+   summarise(density_mean = mean(density, na.rm = T),
+             biomass_mean = mean(biomass, na.rm = T))
+
+tab_CB_IB_GR <- kbl(tmp, 
+    col.names = c('Study_area', 'species',
+                  'Density', 'Biomass'
+                  ),
+    align = 'c', caption = "Corner Brook, Indian Bay, Gander River (2000): Density and Biomass", digits = 3 ) |>
+   kable_paper()
+
+save_kable(tab_CB_IB_GR, file = "output/tab_CB_IB_GR_2000.html")
 
 # END ----
