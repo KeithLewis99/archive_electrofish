@@ -483,7 +483,7 @@ df_2a_den_a1_site <- fn_delta_site(df_2a_den_a1_pds,
 
 # bind and write
 df_2a_den_site <- rbind(df_2a_den_yoy_site, df_2a_den_a1_site)
-write.csv(df_2a_den_year, "data_derived/ws_den_delta_site_1992.csv", row.names = F)
+write.csv(df_2a_den_site, "data_derived/ws_den_delta_site_1992.csv", row.names = F)
 
 
 
@@ -650,11 +650,11 @@ sj_2a_bio_a1_pdy80 <-
    fn_delta_derivative_year(sj_2a_bio_a1_site80, 
                             se_site, 
                             "se")
-str(sj_2a_bio_a1_pdy, give.attr = F)
+str(sj_2a_bio_a1_pdy80, give.attr = F)
 
 # delta
 # this takes mean of density and variance
-sj_2a_bio_yoy80 <- fn_delta_year(sj_2a_bio_yoy_pdy80, 
+sj_2a_bio_yoy80 <- fn_delta_year(sj_2a_bio_yoy_site80, 
                                mean_site,
                                se_site, 
                                age = "YOY")
@@ -949,25 +949,25 @@ df_2a_SJ <- df_med2 |> filter(
    study_area == "St. John's" & data_bio == "3a")
 
 df_2a_SJ_age <- df_2a_SJ |>
-   select(study_area, year, species, site, age, biomass_new, )
+   select(study_area, year, species, site, age, density_new, biomass_new, )
 
 write.csv(df_2a_SJ_age, "data_derived/sj_bio_delta_age_1995_1996.csv", row.names = F)
 
 # site
-df_2a_SJ_site <- df_2a_SJ_age |>
+df_2a_SJ_den_site <- df_2a_SJ_age |>
    group_by(study_area, year, species, age) |>
-   summarise(biomass = mean(biomass_new, na.rm = T),
-             biomass_se = sd(biomass_new, na.rm = T)
+   summarise(density = mean(density_new, na.rm = T),
+             density_se = sd(density_new, na.rm = T)
              )
-write.csv(df_2a_SJ_site, "data_derived/sj_bio_delta_site_1995_1996.csv", row.names = F)   
+write.csv(df_2a_SJ_den_site, "data_derived/sj_den_delta_site_1995_1996.csv", row.names = F)   
 
 # site
-df_2a_SJ_year <- df_2a_SJ_age |>
+df_2a_SJ_bio_year <- df_2a_SJ_age |>
    group_by(study_area, species, age) |>
    summarise(biomass = mean(biomass_new, na.rm = T),
              biomass_se = sd(biomass_new, na.rm = T)
    )
-write.csv(df_2a_SJ_year, "data_derived/sj_bio_delta_year_1995_1996.csv", row.names = F) 
+write.csv(df_2a_SJ_bio_year, "data_derived/sj_bio_delta_bio_year_1995_1996.csv", row.names = F) 
 
 ## 3b ----
 ### age - Trepassey - pools ----
@@ -1055,7 +1055,7 @@ write.csv(df_3b_year_bio, "data_derived/tp_pool_bio_delta_yr_1984_1996.csv", row
 df_3b_SJ <- df_med2 |> filter(
    study_area == "St. John's" & trt == "Pool")
 
-df_3b_SJ <- df_3b_SJ |> select(study_area, year, species, density_new, dll_new, dul_new, biomass_new, bll_new, bul_new, age_new)
+df_3b_SJ <- df_3b_SJ |> select(study_area, year, species, site, density_new, dll_new, dul_new, biomass_new, bll_new, bul_new, age_new)
 write.csv(df_3b_SJ, "data_derived/sj_pool_delta_age_1995_1996.csv", row.names = F)
 # don't go any further - there are zeros for YOY in 1996 and not adults in 1995 - this makes 
 
@@ -1145,7 +1145,7 @@ df_2c_JumpB <- df_med2 |> filter(
           den_ul = density_new + d_se_new*1.96) |>
    select(study_area, year, species, site, age, density_new, d_se_new, den_ll, den_ul)
 
-write.csv(df_2a_den, "data_derived/GG_age_1995_1996.csv", row.names = F)
+write.csv(df_2c_JumpB, "data_derived/JB_age_2017_2018.csv", row.names = F)
 
 ### sites ----
 df_JB2c_den_pds <- 
@@ -1174,7 +1174,7 @@ df_JB2c_den <- fn_delta_year(df_JB2c_den_pdy,
 str(df_JB2c_den, give.attr = F)
 
 ## write and bind
-write.csv(df_JB2c_den, "data_derived/JB2c__year_2017_2018.csv", row.names = F)
+write.csv(df_JB2c_den, "data_derived/JB2c_yr_2017_2018.csv", row.names = F)
 
 
 ## 4 -----
@@ -1193,8 +1193,8 @@ write.csv(df_CB_IB_GR, "data_derived/CB_IB_GB_site_2000.csv", row.names = F)
 ## 5 -----
 df_TN_site <- df_low1 |>
    filter(data.quality == "5a") 
-
-write.csv(df_TN, "data_derived/TN_site_2002.csv", row.names = F)
+# this is not aggregated by site but rather the data from Cote 2007
+write.csv(df_TN_site, "data_derived/TN_site_2002.csv", row.names = F)
 
 df_TN_year <- df_low1 |>
    filter(data.quality == "5a") |>
@@ -1202,7 +1202,7 @@ df_TN_year <- df_low1 |>
    summarise(density = mean(density_new), 
              biomass = mean(biomass_new))
 
-write.csv(df_TN_year, "data_derived/TN_year_2002.csv", row.names = F)
+write.csv(df_TN_year, "data_derived/TN_yr_2002.csv", row.names = F)
 
 
 
@@ -1216,7 +1216,7 @@ df_TI_year <- df_low1 |>
    group_by(study_area, species) |>
    summarise(density = mean(density_new))
 
-write.csv(df_TI_year, "data_derived/TN_year_2006_2010.csv", row.names = F)
+write.csv(df_TI_year, "data_derived/TI_yr_2006_2010.csv", row.names = F)
 
 # #####
 
