@@ -318,32 +318,63 @@ save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
 
 ### 2c ----
 ### GG ----
-GG_site_1995_1996
-GG_yr_1995_1996 
 
-GG_yr_1995_1996$year <- "Both"
+GG_yr_1995_1996$year <- "both"
+GG_bio_yr_1995_1996$year <- "both"
+GG_yr_1995_1996 <- GG_yr_1995_1996 |>
+   rename(mean_site = mean_year, se_site = var_year)
+
+GG_bio_yr_1995_1996 <- GG_bio_yr_1995_1996 |>
+   rename(mean_site = mean_year, se_site = var_year)
+
 GG_yr_1995_1996$species <- "salmonid"
 
 GG_yr_1995_1996 <- GG_yr_1995_1996 |>
    select("study_area", "year", "species", "mean_year",  "ll_site",    "ul_site", "age") |>
    rename(mean_site = mean_year)
 
-GG_den_age <- rbind(GG_site_1995_1996[,-5], GG_yr_1995_1996)
+GG_den_ <- rbind(GG_site_1995_1996[,-5], GG_yr_1995_1996[-4])
+GG_bio_ <- rbind(GG_bio_site_1995_1996[,-5], GG_bio_yr_1995_1996[-4])
+GG_bio_ <- GG_bio_ |>
+   rename(biomass = mean_site,
+          bio_ll = ll_site,
+          bio_ul = ul_site
+          )
 
+common <- intersect(names(GG_den_), 
+                    names(GG_bio_)
+)
 
+out <- bind_cols(GG_den_,
+                 GG_bio_ %>% 
+                    select(-all_of(common)))
 # biomass
 
 
-tab2b_HL_JF <- kbl(res[, c(1:5, 10, 6, 8:9)], 
-                   col.names = c('Study_area', 'Year', 'Species', 'site' , 'trt', 'age',
+tab2c_GG <- kbl(out[, c(1:3, 7, 4:6, 8:10)], 
+                   col.names = c('Study_area', 'Year', 'Species', 'age',
+                                 'mean', '2.5%', '97.5%',
                                  'mean', '2.5%', '97.5%'),
-                   align = 'c', caption = "Joe Farrells (1993-95) and Highlands (2002): Density and Biomass CIs", digits = 3 ) |>
+                   align = 'c', caption = "Great Gull Brook (1997-98): Density and Biomass CIs", digits = 3 ) |>
    collapse_rows(valign = "top",
                  latex_hline = "major") |>
-   add_header_above(header = c(" " = 6, "Density" = 3)) |>
+   add_header_above(header = c(" " = 4, "Density" = 3, "Biomass" = 3)) |>
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
+save_kable(tab2c_GG, file = "tab2c_GG.html")
+
+# 4 ----
+CB_IB_GB_site_2000 
+
+tab4_site_CB_IB_GB <- kbl(CB_IB_GB_site_2000, 
+                col.names = c('Study_area', 'Species', 
+                              'Density', 'Biomass'),
+                align = 'c', caption = "Corner Brook, Indian Bay, Gander River (2000): Density and Biomass", digits = 3 ) |>
+   kable_paper()
+
+save_kable(tab2c_GG, file = "tab4_site_CB_IB_GB.html")
+
+
 
 # END ----

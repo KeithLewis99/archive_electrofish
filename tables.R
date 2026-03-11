@@ -331,5 +331,6 @@ tab_GG_age_1995_1996 <- kbl(GG_age_1995_1996,
 
 save_kable(tab_GG_age_1995_1996, file = "output/tab_GG_age_1995_1996.html")
 
+# 4 ----
 
 # END ----
