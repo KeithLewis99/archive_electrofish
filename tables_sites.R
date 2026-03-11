@@ -100,11 +100,12 @@ save_kable(tab2a_WSsite, file = "output/tab_2aWS_site.html")
 
 ### HL & JF ----
 jf_den_delta_site_1993_1995 <- jf_den_delta_site_1993_1995 |>
-   rename(density = dsum,
-          den_var = dsum_var,
+   rename(density = mean_site,
+          den_var = se_site,
           den_ll = ll_site,
           den_ul = ul_site)
 
+HL_den_delta_site_2002
 HL_den_delta_site_2002 <- HL_den_delta_site_2002 |>
    mutate(den_ll = density - 1.96*density_se,
           den_ul = density + 1.96*density_se)
@@ -130,6 +131,74 @@ tab2b_HL_JF <- kbl(res[, c(1:5, 10, 6, 8:9)],
    kable_paper()
 
 save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
+
+### SJ ----
+# 1980s
+sj_den_delta_site_1983_1985 <- sj_den_delta_site_1983_1985 |>
+   rename(density = mean_site,
+          den_ll = ll_site,
+          den_ul = ul_site
+   )
+
+sj_bio_delta_site_1983_1985 <- sj_bio_delta_site_1983_1985 |>
+   rename(biomass = mean_site,
+          bio_ll = ll_site,
+          bio_ul = ul_site
+   )
+
+
+tmp <- left_join(sj_den_delta_site_1983_1985, 
+                 sj_bio_delta_site_1983_1985, 
+                 by = c("study_area", "year", "species", "age"))
+tmp$trt <- "riffle"
+
+
+# 1990s
+common <- intersect(names(sj_den_delta_site_1995_1996), 
+                    names(sj_bio_delta_site_1995_1996)
+)
+
+out <- bind_cols(sj_den_delta_site_1995_1996,
+                 sj_bio_delta_site_1995_1996 %>% 
+                    select(-all_of(common)))
+out <- out |>
+   group_by(study_area, year, species, age) |>
+   mutate(den_ll = density - density_se*1.96,
+          den_ul = density + density_se*1.96,
+          bio_ll = biomass - biomass_se*1.96,
+          bio_ul = biomass + biomass_se*.196)
+   
+out$trt <- "riffle"
+
+# pools
+sj_pool_delta_site_1995_1996 <- sj_pool_delta_site_1995_1996 |>
+   rename(density = density_new,
+          den_ll = dll_new,
+          den_ul = dul_new,
+          biomass = biomass_new,
+          bio_ll = bll_new,
+          bio_ul = bul_new,
+          age = age_new)
+sj_pool_delta_site_1995_1996$trt <- "pool"
+
+
+SJ_all <- rbind(tmp[,-c(5, 10)], out[, -c(6,8)])
+SJ_all <- rbind(SJ_all, sj_pool_delta_site_1995_1996)
+
+
+tab2b_SJ_all <- kbl(SJ_all[, c(1:3, 7, 11, 4:6, 8:10)], 
+                   col.names = c('Study_area', 'Year', 'Species',  'trt', 'age',
+                                 'mean', '2.5%', '97.5%',
+                                 'mean', '2.5%', '97.5%'),
+                   align = 'c', caption = "St. John's (1982-1996): Density and Biomass CIs", digits = 3 ) |>
+   collapse_rows(valign = "top",
+                 latex_hline = "major") |>
+   add_header_above(header = c(" " = 5, "Density" = 3, "Biomass" = 3)) |>
+   #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+   kable_paper()
+
+save_kable(tab2b_SJ_all, file = "tab2b_SJ_all_site.html")
+
 
 
 # year ----
@@ -252,36 +321,36 @@ save_kable(tab2a_yragg, file = "output/tab_2aCL_yr_agg.html")
 
 
 ### WS 1992 ----
-ws_den_delta_site_1992 <- ws_den_delta_site_1992 |>
-   rename(density = mean_site,
-          den_ll = ll_site,
-          den_ul = ul_site
-   )
-
-ws_bio_delta_site_1992 <- ws_bio_delta_site_1992 |>
-   mutate(den_ll = mean_site - 1.96*se_site,
-          den_ul = mean_site + 1.96*se_site) |>
-   rename(biomass = mean_site)
-
-common <- intersect(names(ws_den_delta_site_1992), 
-                    names(ws_bio_delta_site_1992)
-)
-out <- bind_cols(ws_den_delta_site_1992,
-                 ws_bio_delta_site_1992 %>% 
-                    select(-all_of(common)))
-
-tab2a_WSsite <- kbl(out[, c(1:3, 8, 4, 6:7, 10:12)], 
-                    col.names = c('Study_area', 'Year', 'Species', 'age',
-                                  'mean', '2.5%', '97.5%',
-                                  'mean', '2.5%', '97.5%'),
-                    align = 'c', caption = "West Salmon (1992): Density and Biomass CIs", digits = 3 ) |>
-   #collapse_rows(valign = "top",
-   #             latex_hline = "major") |>
-   add_header_above(header = c(" " = 4, "Density" = 3, "Biomass" = 3)) |>
-   #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
-   kable_paper()
-
-save_kable(tab2a_WSsite, file = "output/tab_2aWS_site.html")
+# ws_den_delta_site_1992 <- ws_den_delta_site_1992 |>
+#    rename(density = mean_site,
+#           den_ll = ll_site,
+#           den_ul = ul_site
+#    )
+# 
+# ws_bio_delta_site_1992 <- ws_bio_delta_site_1992 |>
+#    mutate(den_ll = mean_site - 1.96*se_site,
+#           den_ul = mean_site + 1.96*se_site) |>
+#    rename(biomass = mean_site)
+# 
+# common <- intersect(names(ws_den_delta_site_1992), 
+#                     names(ws_bio_delta_site_1992)
+# )
+# out <- bind_cols(ws_den_delta_site_1992,
+#                  ws_bio_delta_site_1992 %>% 
+#                     select(-all_of(common)))
+# 
+# tab2a_WSsite <- kbl(out[, c(1:3, 8, 4, 6:7, 10:12)], 
+#                     col.names = c('Study_area', 'Year', 'Species', 'age',
+#                                   'mean', '2.5%', '97.5%',
+#                                   'mean', '2.5%', '97.5%'),
+#                     align = 'c', caption = "West Salmon (1992): Density and Biomass CIs", digits = 3 ) |>
+#    #collapse_rows(valign = "top",
+#    #             latex_hline = "major") |>
+#    add_header_above(header = c(" " = 4, "Density" = 3, "Biomass" = 3)) |>
+#    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+#    kable_paper()
+# 
+# save_kable(tab2a_WSsite, file = "output/tab_2aWS_site.html")
 
 ### HL & JF ----
 jf_den_delta_site_1993_1995 <- jf_den_delta_site_1993_1995 |>
@@ -319,9 +388,9 @@ save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
 ### 2c ----
 ### GG ----
 
-GG_yr_1995_1996$year <- "both"
+GG_den_yr_1995_1996$year <- "both"
 GG_bio_yr_1995_1996$year <- "both"
-GG_yr_1995_1996 <- GG_yr_1995_1996 |>
+GG_den_yr_1995_1996 <- GG_den_yr_1995_1996 |>
    rename(mean_site = mean_year, se_site = var_year)
 
 GG_bio_yr_1995_1996 <- GG_bio_yr_1995_1996 |>
@@ -364,6 +433,102 @@ tab2c_GG <- kbl(out[, c(1:3, 7, 4:6, 8:10)],
 
 save_kable(tab2c_GG, file = "tab2c_GG.html")
 
+
+## JB ----
+JB_site_2017_2018
+JB2c_yr_2017_2018$year <- "both"
+JB2c_yr_2017_2018 <- JB2c_yr_2017_2018 |>
+   rename(mean_site = mean_year,
+          se_site = var_year)
+
+JB_site_yr_2017_2018 <- rbind(JB_site_2017_2018, JB2c_yr_2017_2018)
+
+tabJB_site_yr_2017_2018 <- kbl(JB_site_yr_2017_2018[,-c(3, 5)], 
+                col.names = c('Study_area', 'Year', 'age',
+                              'mean', '2.5%', '97.5%'),
+                align = 'c', caption = "Jumper's Brook (2017-2018): Density CIs", digits = 3 ) |>
+   collapse_rows(valign = "top",
+                 latex_hline = "major") |>
+   add_header_above(header = c(" " = 3, "Density" = 3)) |>
+   kable_paper()
+
+save_kable(tabJB_site_yr_2017_2018, file = "tab2c_JB_site_yr_2017_2018.html")
+
+
+# SJ ----
+# # 1980s
+# sj_den_delta_yr_1982_1985 <- sj_den_delta_yr_1982_1985 |>
+#    rename(density = mean_year,
+#           den_ll = ll_site,
+#           den_ul = ul_site
+#    )
+# 
+# sj_bio_delta_yr_1983_1985 <- sj_bio_delta_yr_1983_1985 |>
+#    rename(biomass = mean_year,
+#           bio_ll = ll_site,
+#           bio_ul = ul_site
+#    )
+# 
+# 
+# tmp <- left_join(sj_den_delta_yr_1982_1985, 
+#                  sj_bio_delta_yr_1983_1985, 
+#                  by = c("study_area", "species", "age"))
+# tmp$trt <- "riffle"
+# tmp$period <- "1982-1985"
+# 
+# # 1990s
+# sj_den_delta_yr_1995_1996 <- sj_den_delta_yr_1995_1996 |>
+#    rename(density = mean_year,
+#           den_ll = ll_site,
+#           den_ul = ul_site
+#    )
+# 
+# sj_bio_delta_yr_1993_1995 <- sj_bio_delta_yr_1993_1995 |>
+#    rename(biomass = mean_year,
+#           bio_ll = ll_site,
+#           bio_ul = ul_site
+#    )
+# 
+# common <- intersect(names(sj_den_delta_yr_1995_1996), 
+#                     names(sj_bio_delta_yr_1993_1995)
+# )
+# 
+# out <- bind_cols(sj_den_delta_yr_1995_1996,
+#                  sj_bio_delta_yr_1993_1995 %>% 
+#                     select(-all_of(common)))
+# 
+# out$trt <- "riffle"
+# out$period <- '1995-1996'
+# 
+# 
+# sj_pool_delta_yr_1995_1996 <- sj_pool_delta_yr_1995_1996 |>
+#    rename(density = density_new,
+#           den_ll = dll_new,
+#           den_ul = dul_new,
+#           biomass = biomass_new,
+#           bio_ll = bll_new,
+#           bio_ul = bul_new,
+#           age = age_new)
+# sj_pool_delta_site_1995_1996$trt <- "pool"
+# sj_pool_delta_site_1995_1996$period <- "1995-1996 pools"
+# 
+# SJ_all_yr <- rbind(tmp[,-c(4, 9)], out[, -c(4)])
+# SJ_all_yr <- rbind(SJ_all_yr, sj_pool_delta_yr_1995_1996)
+# 
+# 
+# tab2b_SJ_all <- kbl(SJ_all[, c(1:3, 7, 11, 4:6, 8:10)], 
+#                     col.names = c('Study_area', 'Year', 'Species',  'trt', 'age',
+#                                   'mean', '2.5%', '97.5%',
+#                                   'mean', '2.5%', '97.5%'),
+#                     align = 'c', caption = "St. John's (1982-1996): Density and Biomass CIs", digits = 3 ) |>
+#    collapse_rows(valign = "top",
+#                  latex_hline = "major") |>
+#    add_header_above(header = c(" " = 5, "Density" = 3, "Biomass" = 3)) |>
+#    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
+#    kable_paper()
+# 
+# save_kable(tab2b_SJ_all, file = "tab2b_SJ_all_site.html")
+
 # 4 ----
 CB_IB_GB_site_2000 
 
@@ -373,8 +538,56 @@ tab4_site_CB_IB_GB <- kbl(CB_IB_GB_site_2000,
                 align = 'c', caption = "Corner Brook, Indian Bay, Gander River (2000): Density and Biomass", digits = 3 ) |>
    kable_paper()
 
-save_kable(tab2c_GG, file = "tab4_site_CB_IB_GB.html")
+save_kable(tab4_site_CB_IB_GB, file = "tab4_site_CB_IB_GB.html")
 
+
+# 5a ----
+# this is not aggregated by site but rather the data from Cote 2007
+TN_site_2002 <- TN_site_2002 |>
+   select("study_area", "year", "species", "stations", "density_new", "biomass_new")
+ 
+tab_TN_site_2002 <- kbl(TN_site_2002, 
+                          col.names = c('Study_area', 'year', 'Species',
+                                        'stations', 'Density', 'Biomass'),
+                        align = 'c', 
+                        caption = "Terra Nova National Park (2002): Density and Biomass", 
+                        digits = 3 ) |>
+   kable_paper()
+
+save_kable(tab_TN_site_2002, file = "tab5_TN_site_2002.html")
+
+TN_yr_2002 
+tab_TN_year_2002 <- kbl(TN_yr_2002, 
+                        col.names = c('Study_area', 'year', 'Species', 
+                                      'Density', 'Biomass'),
+                        align = 'c', caption = "Terra Nova National Park (2002): Density and Biomass", digits = 3 ) |>
+   kable_paper()
+
+save_kable(tab_TN_year_2002, file = "tab5_TN_year_2002.html")
+
+# 5b ----
+# this is also not aggregated by site but just the data as in the report
+TI_site_2006_2010 <- TI_site_2006_2010 |>
+   select("study_area", "year", "species", "density_new")
+
+tab_TI_site_2006_2010 <- kbl(TI_site_2006_2010, 
+                        col.names = c('Study_area', 'year', 'Species',
+                                      'Density'),
+                        align = 'c', 
+                        caption = "Tinto Brook (2006-2010): Density", 
+                        digits = 3 ) |>
+   kable_paper()
+
+save_kable(tab_TI_site_2006_2010, file = "tab5_TI_site_2006_2010.html")
+
+ 
+tab_TI_yr_2006_2010 <- kbl(TI_yr_2006_2010, 
+                        col.names = c('Study_area', 'Species', 
+                                      'Density'),
+                        align = 'c', caption = "Tinto Brook (2006-2010): Density", digits = 3 ) |>
+   kable_paper()
+
+save_kable(tab_TI_yr_2006_2010, file = "tab5_TI_year_2006_2010.html")
 
 
 # END ----
