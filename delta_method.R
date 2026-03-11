@@ -1090,6 +1090,7 @@ df_low1 <- df_low |>
 
 ## 2c ----
 ### age - GG ----
+# density
 df_2c_GG <- df_low1 |> filter(
    study_area == "Great Gull Brook")
 
@@ -1100,7 +1101,7 @@ df_2c_den_pds <- fn_delta_derivative_site(df_2c_GG, d_se_new, "se")
 df_2c_den_pds$age <- "all"
 
 df_2c_den_site <- fn_delta_site(df_2c_den_pds, density_new, d_se, age = "all")
-write.csv(df_2c_den_site, "data_derived/GG_site_1995_1996.csv", row.names = F)
+write.csv(df_2c_den_site, "data_derived/GG_den_site_1995_1996.csv", row.names = F)
 
 ### years ----
 # this converts se to var and does partial derivative
@@ -1112,7 +1113,29 @@ df_2a_den <- fn_delta_year(df_2c_den_pdy, mean_site, se_site, age = "all")
 str(df_2a_den_a1_pdy, give.attr = F)
 
 ## write and bind
-write.csv(df_2a_den, "data_derived/GG_yr_1995_1996.csv", row.names = F)
+write.csv(df_2a_den, "data_derived/GG_den_yr_1995_1996.csv", row.names = F)
+
+
+# biomass
+
+### sites ----
+df_2c_bio_pds <- fn_delta_derivative_site(df_2c_GG, b_se_new, "se")
+df_2c_bio_pds$age <- "all"
+
+df_2c_bio_site <- fn_delta_site(df_2c_bio_pds, biomass_new, b_se, age = "all")
+write.csv(df_2c_bio_site, "data_derived/GG_bio_site_1995_1996.csv", row.names = F)
+
+### years ----
+# this converts se to var and does partial derivative
+## this matches EXCEL
+df_2c_bio_pdy <- fn_delta_derivative_year(df_2c_bio_site, se_site, "se")
+
+df_2a_bio <- fn_delta_year(df_2c_bio_pdy, mean_site, se_site, age = "all")
+
+
+## write and bind
+write.csv(df_2a_bio, "data_derived/GG_bio_yr_1995_1996.csv", row.names = F)
+
 
 
 ### age - JumpB ----
