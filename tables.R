@@ -152,6 +152,12 @@ list2env(ls_delta_ageagg, envir = .GlobalEnv)
 str(ls_delta_ageagg, 1)
 
 ### TP ----
+tp_den_delta_age_1984_1996 <- tp_den_delta_age_1984_1996 |>
+   rename(density = dsum,
+          den_var = dsum_var,
+          den_ll = ll_site,
+          den_ul = ul_site)
+
 tp_bio_delta_age_1984_1996 <- tp_bio_delta_age_1984_1996 |>
    rename(biomass = dsum,
           bio_var = dsum_var,
@@ -159,21 +165,11 @@ tp_bio_delta_age_1984_1996 <- tp_bio_delta_age_1984_1996 |>
           bio_ul = ul_site)
 
 
-tp_den_delta_age_1984_1996 <- tp_den_delta_age_1984_1996 |>
-   rename(density = dsum,
-          den_var = dsum_var,
-          den_ll = ll_site,
-          den_ul = ul_site)
+keys <- c("study_area", "year", "species", "age", "trt")
 
-
-
-keys <- c("study_area", "year", "species", "age")
-
-res_trt <- tp_pool_delta_age_1984_1996 %>%
-   # out already has density/biomass + CI/var; keep it as the primary table
+res_trt <- tp_den_delta_age_1984_1996 %>%
    full_join(
-        tp_bio_delta_age_1984_1996%>%
-         select(all_of(keys)), 
+        tp_bio_delta_age_1984_1996, 
       by = keys
    )
 
@@ -185,15 +181,9 @@ tp_pool_delta_age_1984_1996 <- tp_pool_delta_age_1984_1996 |>
 
 keys <- c("study_area", "year", "species", "trt", "age")
 
-res <- res_trt %>%
-   # out already has density/biomass + CI/var; keep it as the primary table
-   full_join(
-      tp_pool_delta_age_1984_1996 %>%
-         select(all_of(keys)), 
-      by = keys
-   )
+res <- bind_rows(res_trt[, -c(6,11)], tp_pool_delta_age_1984_1996[,-c(6,8)])
 
-tab2b_ageagg <- kbl(res[, c(1:4, 9, 5, 7:8, 10, 12:13)], 
+tab2b_ageagg <- kbl(res[, c(1:4, 8, 5:7, 9:11)], 
                   col.names = c('Study_area', 'Year', 'Species', 'trt', 'age',
                                 'mean', '2.5%', '97.5%',
                                 'mean', '2.5%', '97.5%'),
