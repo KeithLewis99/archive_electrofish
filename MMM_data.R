@@ -32,7 +32,7 @@ df_sum <- df_sb |>
    group_by(Year, Species, Station, Area) |>
    summarise(bio.sum = sum(Weight.g, na.rm = T), abun = n()) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
-write.csv(df_sum, "data_derived/mmm/SB_disagg_2001_2003.csv", row.names = F)
+write.csv(df_sum, "data_derived/MMM/SB_dage_2001_2003.csv", row.names = F)
 
 sb_site <- df_sum |>
    group_by(Species, Year) |>
@@ -174,17 +174,13 @@ df_HLTP <- df_HLTP %>%
 
 ## split ----
 # split into Trepassey and Highlands
-df_tp <- df_HLTP
-
-
-
 
 df_HLTP_sum <- df_HLTP |>
    filter(Sweep <= 3) |>
    group_by(Study_area, Year, Species, Stn_no, Area) |>
    summarise(bio.sum = sum(Weight.g, na.rm = T), abun = n()) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
-write.csv(df_HLTP_sum, "data_derived/mmm/SB_disagg_2001_2003.csv", row.names = F)
+write.csv(df_HLTP_sum, "data_derived/mmm/HLTP_dage_2001_2003.csv", row.names = F)
 
 HLTP_site <- df_HLTP_sum |>
    group_by(Study_area, Species, Year) |>
