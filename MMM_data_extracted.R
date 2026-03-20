@@ -84,8 +84,9 @@ df_2b_TP <- df_med2 |> filter(
    study_area == "Northeast Brook, Trepassey")
 
 
+source("fn_MMM.R")
 TP_age <- fn_age(df_2b_TP, file_name = "TP_age_1984_1996")
-TP_yr <- fn_yr(df_2b_TP, file_name = "TP_yr__1984_1996")
+TP_yr <- fn_yr(df_2b_TP, file_name = "TP_yr_1984_1996")
 
 
 
@@ -94,9 +95,9 @@ TP_yr <- fn_yr(df_2b_TP, file_name = "TP_yr__1984_1996")
 ### CL-age ----
 unique(df_med2$study_area)
 df_2a_CL <- df_med2 |> filter(
-   study_area == "Copper Lake")
+   study_area == "Copper Lake") 
 
-CL_age <- fn_age(df_2a_CL, group_by_var1 = stations, file_name = "CL_age_1993_1995")
+CL_age <- fn_age(df_2a_CL, group_by_var1 = stations, file_name = "CL_age_1993_1995") 
 CL_site <- fn_site(df_2a_CL, file_name = "CL_site_1993_1995")
 CL_yr <- fn_yr(df_2a_CL, file_name = "CL_yr_1993_1995")
 
@@ -210,7 +211,7 @@ df_GG <- df_low1 |> filter(
 unique(df_GG$year)
 
 
-df_GG_site <- df_GG |>
+GG_site <- df_GG |>
    group_by(study_area, species, year) |>
    summarise(n = n(),
              min_den = min(density_new, na.rm = T), 
@@ -223,7 +224,7 @@ df_GG_site <- df_GG |>
              sd_bio = sd(biomass_new, na.rm = T)
    )
 
-write(df_GG_site, "data_derived/mmm/GG_site_1997_1998.csv", row.names = F)
+write.csv(GG_site, "data_derived/mmm/GG_site_1997_1998.csv", row.names = F)
 
 GG_yr <- df_GG |>
    group_by(study_area, species) |>
@@ -237,13 +238,16 @@ GG_yr <- df_GG |>
              mean_bio = mean(biomass_new, na.rm = T),
              sd_bio = sd(biomass_new, na.rm = T)
    )
-write(df_GG_yr, "data_derived/mmm/GG_yr_1997_1998.csv", row.names = F)
+write.csv(GG_yr, "data_derived/mmm/GG_yr_1997_1998.csv", row.names = F)
 
 ### age - JumpB ----
 df_2c_JumpB <- df_med2 |> filter(
    study_area == "Jumpers Brook")
 
 JB_yr <- fn_yr(df_2c_JumpB, trt = trt, file_name = "JumpB_yr_2017_2018")
+
+write.csv(JB_yr, "data_derived/mmm/GG_yr_1997_2017_2018.csv", row.names = F)
+
 
 
 ## 4 -----
@@ -254,8 +258,8 @@ df_CB_IB_GR_age <- df_low1 |>
 df_CB_IB_GR <- df_low1 |>
    filter(data.quality == "4") |>
    group_by(study_area, species) |>
-   summarise(density = mean(density_new), 
-             biomass = mean(biomass_new))
+   summarise(mean_den = mean(density_new), 
+             mean_bio = mean(biomass_new))
 write.csv(df_CB_IB_GR, "data_derived/mmm/CB_IB_GB_site_2000.csv", row.names = F)
 
 
@@ -265,9 +269,9 @@ df_TN_site <- df_low1 |>
 
 df_TN_year <- df_low1 |>
    filter(data.quality == "5a") |>
-   group_by(study_area, year, species) |>
-   summarise(density = mean(density_new), 
-             biomass = mean(biomass_new))
+   group_by(study_area, species) |>
+   summarise(mean_den = mean(density_new), 
+             mean_bio = mean(biomass_new))
 
 write.csv(df_TN_year, "data_derived/mmm/TN_yr_2002.csv", row.names = F)
 
@@ -279,6 +283,9 @@ df_TI_site <- df_low1 |>
 df_TI_year <- df_low1 |>
    filter(data.quality == "5b") |>
    group_by(study_area, species) |>
-   summarise(density = mean(density_new))
+   summarise(mean_den = mean(density_new))
 write.csv(df_TI_year, "data_derived/mmm/TI_yr_2006_2010.csv", row.names = F)
+
+
+
 # END ----
