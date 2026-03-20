@@ -50,13 +50,36 @@ fn_delta_Age <- function(df, group_by_var1 = NULL, pt_est2, var_est3, age) {
       select(study_area, year, species, age, trt, {{group_by_var1}}, {{pt_est2}}, {{var_est3}})|>
       group_by(study_area, year, species, {{group_by_var1}}, trt) |>
       summarise(dsum = sum({{pt_est2}}, na.rm = T),
-                dsum_var = sum({{var_est3}}, na.rm = T)^2,
+                dsum_var = sum({{var_est3}}^2, na.rm = T)^2,
                 ll_site = dsum - sqrt(dsum_var)*1.96,
                 ul_site = dsum + sqrt(dsum_var)*1.96
       ) 
    df_dAge$age <- age
    return(df_dAge)
 }
+
+
+# from copilot - this seems to make sense
+fn_lndelta_Age <- function(df, group_by_var1 = NULL, pt_est2, var_est3, age) {
+   #browser()
+   df_dAge <- df |>
+      select(study_area, year, species, age, trt, {{group_by_var1}}, {{pt_est2}}, {{var_est3}})|>
+      group_by(study_area, year, species, {{group_by_var1}}, trt) |>
+     summarise(n = n(),
+               dsum = sum({{pt_est2}}, na.rm = T),
+                dsum_var  = sum({{var_est3}}^2, na.rm = T),
+               log_dsum = log(dsum),
+               log_sd = sqrt(log(1 + (dsum_var/log_dsum^2))),
+                 log_ll    = log_dsum - 1.96 * log_sd,
+                 log_ul    = log_dsum + 1.96 * log_sd,
+                 real_ll = exp(log_ll),
+                 real_ul = exp(log_ul)
+      ) 
+   df_dAge$age <- age
+   return(df_dAge)
+}
+
+
 # fn_delta_Age <- function(df, var1, var2, var_trt = NULL) {
 #    if(is.null(var_trt)) {
 #       df_dAge <- df |>
