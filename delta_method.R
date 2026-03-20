@@ -2,15 +2,18 @@
 ## see Table X in the tech report.
 
 
-# export_med is from the excel file df_summary_v1.xlsx where I compiled all of the data from the various reports and papers. This file focused on data in tables while Fig_data_juicr_extracted-v1.xlsx extrated data from tables and I copied this to export_med or export low depending on the quality of the data.
+# export_med is from the excel file df_summary_v2.xlsx where I compiled all of the data from the various reports and papers. This file focused on data in tables while Fig_data_juicr_extracted-v1.xlsx extrated data from tables and I copied this to export_med or export low depending on the quality of the data.
 ## I standardized the area for some of the studies (e.g., multiplied by 100 for those that were per 1 m2) and standardized the ages and species names. I also added a column for data type (density or biomass) and data quality (1-5). I will use this file to calculate the delta method estimates for all the studies that are ranked 2-5 in terms of data quality.
 
 # need to make sure that I am using the right density and biomass and assocaited variance/se throughout - what about dyear_var
+
+#Of all sites, the variance is a) either derived from the CI where we assume normal confidence intervals, b) extracted from the graph or table and assumed to be the SE of the estimate, c) for Trepsassey, the sd is reported and this is converted to SE (not done yet)
+
 # check that the proper age is being filtered
-# make talbes
 # check against excel
 # check output tables
 # chnage names of tables
+# change se's on Trepassey
 
 library(dplyr)
 library(forcats)
@@ -106,7 +109,7 @@ df_2b_den_a1 <- fn_filterAge(df_2b_TP,
 str(df_2b_den_a1)
 
 # delta Age1 - density_new, d_se_new
-df_2b_den_a1_d <- fn_delta_Age(df_2b_den_a1, 
+df_2b_den_a1_d <- fn_lndelta_Age(df_2b_den_a1, 
                                pt_est2 = density_new, 
                                var_est3 = d_se_new, 
                                age="1+")
@@ -116,6 +119,12 @@ str(df_2b_den_a1_d, give.attr = F)
 df_2b_den_yoy1 <- df_2b_den_yoy |> 
    select(study_area, year, species, trt,  density_new, d_se_new, dll_new, dul_new, age) |>
    rename(dsum = density_new, dsum_var = d_se_new, ll_site = dll_new, ul_site = dul_new)
+
+df_2b_den_a1_d <- df_2b_den_a1_d |>
+   select(study_area, year, species, trt, dsum, dsum_var, 
+          real_ll, real_ul, age) |>
+   rename(ll_site = real_ll, ul_site = real_ul)
+
 
 #bind and write
 df_2b_den_age <- rbind(df_2b_den_yoy1, df_2b_den_a1_d)
@@ -1075,38 +1084,38 @@ write.csv(df_3b_SJ, "data_derived/sj_pool_delta_age_1995_1996.csv", row.names = 
 
 
 
-# Low ----
-## import data ----
-## stdz data ----
-df_low <- read.csv("data/export_low.csv")
-str(df_low)
-unique(df_low$species)
-unique(df_low$study_area)
-
-df_low |>
-   group_by(study_area) |>
-   summarise(
-      unique_den = paste(sort(unique(data.quality)), collapse = ", "),
-      .groups = "drop"
-   )
-
-# standardize area
-df_low1 <- df_low |>
-   mutate(density_new = ifelse(modifier == 1, density*100, density)) |>
-   mutate(dll_new = ifelse(modifier == 1, dll*100, dll)) |>
-   mutate(dul_new = ifelse(modifier == 1, dul*100, dul)) |> 
-   mutate(d_se_new = ifelse(modifier == 1, d_se*100, d_se)) |> 
-   mutate(biomass_new = ifelse(modifier == 1, biomass*100, biomass)) |>
-   mutate(bll_new = ifelse(modifier == 1, bll*100, bll)) |>
-   mutate(bul_new = ifelse(modifier == 1, bll*100, bll)) |>
-   mutate(b_se_new = ifelse(modifier == 1, b_se*100, b_se)) 
-
-
+   # Low ----
+   ## import data ----
+   ## stdz data ----
+   df_low <- read.csv("data/export_low.csv")
+   str(df_low)
+   unique(df_low$species)
+   unique(df_low$study_area)
+   
+   df_low |>
+      group_by(study_area) |>
+      summarise(
+         unique_den = paste(sort(unique(data.quality)), collapse = ", "),
+         .groups = "drop"
+      )
+   
+   # standardize area
+   df_low1 <- df_low |>
+      mutate(density_new = ifelse(modifier == 1, density*100, density)) |>
+      mutate(dll_new = ifelse(modifier == 1, dll*100, dll)) |>
+      mutate(dul_new = ifelse(modifier == 1, dul*100, dul)) |> 
+      mutate(d_se_new = ifelse(modifier == 1, d_se*100, d_se)) |> 
+      mutate(biomass_new = ifelse(modifier == 1, biomass*100, biomass)) |>
+      mutate(bll_new = ifelse(modifier == 1, bll*100, bll)) |>
+      mutate(bul_new = ifelse(modifier == 1, bll*100, bll)) |>
+      mutate(b_se_new = ifelse(modifier == 1, b_se*100, b_se)) 
+   
+   
 ## 2c ----
 ### age - GG ----
 # density
 df_2c_GG <- df_low1 |> filter(
-   study_area == "Great Gull Brook")
+      study_area == "Great Gull Brook")
 
 write.csv(df_2c_GG, "data_derived/GG_age_1995_1996.csv", row.names = F)
 
