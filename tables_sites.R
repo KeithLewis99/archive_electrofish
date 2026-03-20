@@ -131,7 +131,7 @@ tab2b_HL_JF <- kbl(res[, c(1:4, 9, 5, 7:8)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab2b_HL_JF, file = "tab_HL_JF_site.html")
+save_kable(tab2b_HL_JF, file = "output/tab_HL_JF_site.html")
 
 ### SJ ----
 # 1980s
@@ -386,7 +386,7 @@ tab2b_JF <- kbl(jf_den_delta_yr_1993_1995[, -c(5)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab2b_JF, file = "tab_JF_site.html")
+save_kable(tab2b_JF, file = "output/tab_JF_site.html")
 
 ### 2c ----
 ### GG ----
@@ -447,7 +447,7 @@ tab2c_GG <- kbl(out[, c(1:3, 7, 4:6, 8:10)],
    #   add_header_above(header = c(" " = 2, "Summer" = 6)) |>
    kable_paper()
 
-save_kable(tab2c_GG, file = "tab2c_GG.html")
+save_kable(tab2c_GG, file = "output/tab2c_GG.html")
 
 
 ## JB ----
@@ -468,7 +468,7 @@ tabJB_site_yr_2017_2018 <- kbl(JB_site_yr_2017_2018[,-c(3, 5)],
    add_header_above(header = c(" " = 3, "Density" = 3)) |>
    kable_paper()
 
-save_kable(tabJB_site_yr_2017_2018, file = "tab2c_JB_site_yr_2017_2018.html")
+save_kable(tabJB_site_yr_2017_2018, file = "output/tab2c_JB_site_yr_2017_2018.html")
 
 
 # SJ ----
@@ -554,7 +554,7 @@ tab4_site_CB_IB_GB <- kbl(CB_IB_GB_site_2000,
                 align = 'c', caption = "Corner Brook, Indian Bay, Gander River (2000): Density and Biomass", digits = 3 ) |>
    kable_paper()
 
-save_kable(tab4_site_CB_IB_GB, file = "tab4_site_CB_IB_GB.html")
+save_kable(tab4_site_CB_IB_GB, file = "output/tab4_site_CB_IB_GB.html")
 
 
 # 5a ----
@@ -570,7 +570,7 @@ tab_TN_site_2002 <- kbl(TN_site_2002,
                         digits = 3 ) |>
    kable_paper()
 
-save_kable(tab_TN_site_2002, file = "tab5_TN_site_2002.html")
+save_kable(tab_TN_site_2002, file = "output/tab5_TN_site_2002.html")
 
 TN_yr_2002 
 tab_TN_year_2002 <- kbl(TN_yr_2002, 
@@ -579,7 +579,7 @@ tab_TN_year_2002 <- kbl(TN_yr_2002,
                         align = 'c', caption = "Terra Nova National Park (2002): Density and Biomass", digits = 3 ) |>
    kable_paper()
 
-save_kable(tab_TN_year_2002, file = "tab5_TN_year_2002.html")
+save_kable(tab_TN_year_2002, file = "output/tab5_TN_year_2002.html")
 
 # 5b ----
 # this is also not aggregated by site but just the data as in the report
@@ -594,7 +594,7 @@ tab_TI_site_2006_2010 <- kbl(TI_site_2006_2010,
                         digits = 3 ) |>
    kable_paper()
 
-save_kable(tab_TI_site_2006_2010, file = "tab5_TI_site_2006_2010.html")
+save_kable(tab_TI_site_2006_2010, file = "output/tab5_TI_site_2006_2010.html")
 
  
 tab_TI_yr_2006_2010 <- kbl(TI_yr_2006_2010, 
@@ -603,7 +603,7 @@ tab_TI_yr_2006_2010 <- kbl(TI_yr_2006_2010,
                         align = 'c', caption = "Tinto Brook (2006-2010): Density", digits = 3 ) |>
    kable_paper()
 
-save_kable(tab_TI_yr_2006_2010, file = "tab5_TI_year_2006_2010.html")
+save_kable(tab_TI_yr_2006_2010, file = "output/tab5_TI_year_2006_2010.html")
 
 
 # END ----
