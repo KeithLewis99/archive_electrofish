@@ -95,15 +95,13 @@ library(ggspatial)
 
 main_map <- ggplot(newfoundland_island) +
    geom_sf(fill = "grey", color = "black") +
-   geom_point(data = coords, aes(long, lat)) +
-   geom_text(data = coords, 
-             aes(long, lat, label = abbreviation)) +
-   # geom_segment(data = study.areas,
-   #              aes(x = xend, y = yend, xend = long, yend = lat),
-   #              arrow = arrow(length = unit(0.01, "npc"))
-   # ) +
+   geom_point(data = coords[-27,], aes(long, lat)) +
+   geom_text(data = coords[-27,], 
+             aes(long, lat, label = abbreviation),
+             position = position_jitter(width = 0.1, height = 0.1)) +
    ylab("Latitude") +
    xlab("Longitude") +
+   #xlim(-52, -60) +
    annotation_north_arrow(location = "tl",which_north = "true", 
                           pad_x = unit(0.1, "cm"), pad_y = unit(0.1, "cm"),
                           style = north_arrow_orienteering,width = unit(1, "cm"), 
@@ -114,3 +112,26 @@ main_map <- ggplot(newfoundland_island) +
 main_map
 ggsave("figs/study_areas.png", main_map, width = 8, height = 6, dpi = 300, units = "in")
 ggsave("figs/4study_areas.png", main_map, width = 8, height = 6, dpi = 300, units = "in")
+
+
+
+
+main_map <- ggplot(newfoundland_island) +
+   geom_sf(fill = "grey", color = "black") +
+   geom_point(data = coords[-27,], aes(long, lat)) +
+   geom_text_repel(data = coords[-27,],
+             aes(long, lat, label = abbreviation),
+             point.padding = 0.35,
+             box.padding   = 0.35,
+             min.segment.length = 0
+   ) +
+   ylab("Latitude") +
+   xlab("Longitude") +
+   annotation_north_arrow(location = "tl",which_north = "true", 
+                          pad_x = unit(0.1, "cm"), pad_y = unit(0.1, "cm"),
+                          style = north_arrow_orienteering,width = unit(1, "cm"), 
+                          height = unit(1, "cm")) +
+   annotation_scale() +
+   theme_minimal()
+main_map
+ggsave("figs/study_areas.png", main_map, width = 8, height = 6, dpi = 300, units = "in")
