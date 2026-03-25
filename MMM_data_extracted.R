@@ -127,7 +127,7 @@ WS_age <- fn_age(df_2a_WS,
                  group_by_var1 = site, 
                  trt = trt,
                  file_name = "WS_age_1992")
-WS_site <- fn_site(df_2a_WS, trt = trt, file_name = "WS_site_1992")
+WS_yr <- fn_yr(df_2a_WS, trt = trt, file_name = "WS_yr_1992")
 
 
 ### SJ-age ----
@@ -246,7 +246,6 @@ df_2c_JumpB <- df_med2 |> filter(
 
 JB_yr <- fn_yr(df_2c_JumpB, trt = trt, file_name = "JumpB_yr_2017_2018")
 
-write.csv(JB_yr, "data_derived/mmm/GG_yr_1997_2017_2018.csv", row.names = F)
 
 
 
@@ -260,7 +259,7 @@ df_CB_IB_GR <- df_low1 |>
    group_by(study_area, species) |>
    summarise(mean_den = mean(density_new), 
              mean_bio = mean(biomass_new))
-write.csv(df_CB_IB_GR, "data_derived/mmm/CB_IB_GB_site_2000.csv", row.names = F)
+write.csv(df_CB_IB_GR, "data_derived/mmm/CB_IB_GB_yr_2000.csv", row.names = F)
 
 
 ## 5 -----
