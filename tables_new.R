@@ -4,6 +4,7 @@
 library(dplyr)
 library(kableExtra)
 library(purrr)
+library(tidyr)
 
 # function ----
 # read all files in a folder that match a pattern and name each one
@@ -23,7 +24,7 @@ temp1 = list.files(path = "data_derived/MMM", pattern=".+_age.+.csv$", full.name
 ls_age = (lapply(temp1, read.csv))
 names(ls_age) <- name_files(temp1)
 list2env(ls_age, envir = .GlobalEnv)
-str(ls_age, 2)
+str(ls_age, 1)
 
 # fix a few dfs
 ls_age$CL_age_1993_1995 <- ls_age$CL_age_1993_1995 |>
@@ -43,7 +44,7 @@ ls_age <- map(ls_age, ~ {
 
 df_age <- bind_rows(ls_age)
 
-
+### import ----
 # import SB
 df_SB <- read.csv("data_derived/mmm/SB_dage_2001_2003.csv")
 df_SB1 <- df_SB[, c(1:3, 7, 8)] |>
@@ -53,13 +54,13 @@ df_SB1$study_area <- "Stoney Brook"
 df_age <- bind_rows(df_age, df_SB1)
 
 # import HLTP
-df_HLTP <- read.csv("data_derived/mmm/HLTP_dage_2001_2003.csv")
+df_HLTP <- read.csv("data_derived/mmm/HLTP_dage_2012_2018.csv")
 df_HLTP1 <- df_HLTP[, c(1:4, 8, 9)] |>
    rename(study_area = Study_area, year = Year, species = Species, site = Stn_no, mean_den = abun.stand, mean_bio = bio.stand)
 df_HLTP1$site <- as.character(df_HLTP1$site)
 
 df_age <- bind_rows(df_age, df_HLTP1)
-write.csv(df_age, "data_derived/MMM/df_age.csv", row.names = F)
+write.csv(df_age, "output/df_age.csv", row.names = F)
 
 # make table
 tab_age <- kbl(df_age, 
@@ -104,7 +105,7 @@ ls_site$SB_site_2001_2003 <- ls_site$SB_site_2001_2003 |>
 # bind
 df_site <- bind_rows(ls_site)
 df_site <- df_site[, c(1:2, 5:10, 3, 11:13, 4, 14)]
-write.csv(df_site, "data_derived/MMM/df_site.csv", row.names = F)
+write.csv(df_site, "output/df_site.csv", row.names = F)
 
 # table
 tab_site <- kbl(df_site, 
@@ -136,7 +137,23 @@ str(ls_year, 1)
 
 
 df_year <- bind_rows(ls_year)
-write.csv(df_year, "data_derived/MMM/df_year.csv", row.names = F)
+df_year <- df_year[, c(1:2, 5:9, 3, 10:12, 4, 13)]
+
+# import SB
+df_SB_yr <- read.csv("data_derived/mmm/SB_year_2001_2003.csv")
+df_SB_yr$study_area <- "Stoney Brook"
+df_SB_yr <- df_SB_yr |>
+   rename(species = Species)
+
+df_year <- bind_rows(df_year, df_SB_yr)
+
+# import HLTP
+df_HLTP_yr <- read.csv("data_derived/mmm/HLTP_year_2012_2018.csv")
+df_HLTP_yr <- df_HLTP_yr |>
+   rename(study_area = Study_area, species = Species)
+df_year <- bind_rows(df_year, df_HLTP_yr)
+
+write.csv(df_year, "output/df_year.csv", row.names = F)
 
 # table
 tab_year <- kbl(df_year, 
@@ -151,3 +168,66 @@ tab_year <- kbl(df_year,
    kable_paper()
 
 save_kable(tab_year, file = "output/tab_year.html")
+
+
+### density ----
+
+df_year_den <- df_year |>
+   filter(!is.na(age_new)) |>
+   group_by(study_area, species, age_new, trt) |>
+   summarise(min = min(mean_den),
+             max = max(mean_den)) |>
+   #print(n = Inf)
+   pivot_wider(id_cols = c(study_area, trt),
+               names_from = c(species,age_new),
+               values_from = c(min, max)
+   )
+
+df_year_den_min <- df_year |>
+    filter(!is.na(age_new)) |>
+   #filter(!is.na(age_new) & trt != "pool") |>
+   group_by(species, age_new) |>
+   summarise(min = min(mean_den, na.rm = T)) 
+
+
+df_year_den_max <- df_year |>
+    filter(!is.na(age_new)) |>
+   #filter(!is.na(age_new) & trt != "pool") |>
+   group_by(species, age_new) |>
+   summarise(max = max(mean_den, na.rm = T)) 
+
+df_year_den_min <- left_join(df_year_den_min, df_year[, c(1:4, 8)], by = c('species', 'age_new', 'min' = 'mean_den'))
+df_year_den_max <- left_join(df_year_den_max, df_year[, c(1:4, 8)], by = c('species', 'age_new', 'max' = 'mean_den'))
+
+
+### biomass ----
+df_year_bio <- df_year |>
+   filter(!is.na(age_new)) |>
+   group_by(study_area, species, age_new, trt) |>
+   summarise(min = min(mean_bio),
+             max = max(mean_bio)) |>
+   #print(n = Inf)
+   pivot_wider(id_cols = c(study_area, trt),
+               names_from = c(species,age_new),
+               values_from = c(min, max)
+   )
+
+
+df_year_bio_min <- df_year |>
+   filter(!is.na(age_new)) |>
+   #filter(!is.na(age_new) & trt != "pool") |>
+   group_by(species, age_new) |>
+   summarise(min = min(mean_bio, na.rm = T)) 
+
+
+df_year_bio_max <- df_year |>
+   filter(!is.na(age_new)) |>
+   #filter(!is.na(age_new) & trt != "pool") |>
+   group_by(species, age_new) |>
+   summarise(max = max(mean_bio, na.rm = T)) 
+
+df_year_bio_min <- left_join(df_year_bio_min, df_year[, c(1:4, 12)], by = c('species', 'age_new', 'min' = 'mean_bio'))
+df_year_bio_max <- left_join(df_year_bio_max, df_year[, c(1:4, 12)], by = c('species', 'age_new', 'max' = 'mean_bio'))
+
+
+# End ----
