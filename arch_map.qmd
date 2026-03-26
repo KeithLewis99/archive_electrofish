@@ -15,7 +15,7 @@ library(leaflet)
 library(dplyr)
 library(ggpubr)
 
-coords <- read.csv("river_coordinates-v1.csv")
+coords <- read.csv("data/river_coordinates-v1.csv")
 #coords_PB <- read.csv("../../PamehacDepletion/data/waypoints.csv")
 str(coords)
 ```
