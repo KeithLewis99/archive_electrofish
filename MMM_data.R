@@ -44,8 +44,7 @@ sb_site <- df_sum |>
              min_bio = min(bio.stand),
              max_bio = max(bio.stand),
              mean_bio = mean(bio.stand),
-             sd_bio = sd(bio.stand),
-             min_bio = min(bio.stand)
+             sd_bio = sd(bio.stand)
    )
 write.csv(sb_site, "data_derived/mmm/SB_site_2001_2003.csv", row.names = F)
 
@@ -59,8 +58,7 @@ sb_year <- df_sum |>
              min_bio = min(bio.stand),
              max_bio = max(bio.stand),
              mean_bio = mean(bio.stand),
-             sd_bio = sd(bio.stand),
-             min_bio = min(bio.stand)
+             sd_bio = sd(bio.stand)
    )
 write.csv(sb_year, "data_derived/mmm/SB_year_2001_2003.csv", row.names = F)
 
@@ -191,8 +189,7 @@ HLTP_site <- df_HLTP_sum |>
              min_bio = min(bio.stand),
              max_bio = max(bio.stand),
              mean_bio = mean(bio.stand),
-             sd_bio = sd(bio.stand),
-             min_bio = min(bio.stand)
+             sd_bio = sd(bio.stand)
    )
 write.csv(HLTP_site, "data_derived/mmm/HLTP_site_2012_2018.csv", row.names = F)
 
