@@ -15,8 +15,8 @@ name_files = function(x) {
 }
 
 
-## age ---- 
-### load files ----
+# age ---- 
+## load files ----
 # create pattern
 temp1 = list.files(path = "data_derived/MMM", pattern=".+_age.+.csv$", full.names = T)
 
@@ -44,7 +44,7 @@ ls_age <- map(ls_age, ~ {
 
 df_age <- bind_rows(ls_age)
 
-### import ----
+## import ----
 # import SB
 df_SB <- read.csv("data_derived/mmm/SB_dage_2001_2003.csv")
 df_SB1 <- df_SB[, c(1:3, 7, 8)] |>
@@ -79,8 +79,8 @@ save_kable(tab_age, file = "output/tab_age.html")
 
 
 
-## site ---- 
-### load files ----
+# site ---- 
+## load files ----
 # create pattern
 temp2 = list.files(path = "data_derived/MMM", pattern=".+_site.+.csv$", full.names = T)
 
@@ -104,7 +104,7 @@ ls_site$SB_site_2001_2003 <- ls_site$SB_site_2001_2003 |>
 
 # bind
 df_site <- bind_rows(ls_site)
-df_site <- df_site[, c(1:2, 5:10, 3, 11:13, 4, 14)]
+#df_site <- df_site[, c(1:2, 5:10, 3, 11:13, 4, 14)]
 write.csv(df_site, "output/df_site.csv", row.names = F)
 
 # table
@@ -123,8 +123,8 @@ save_kable(tab_site, file = "output/tab_site.html")
 
 
 
-## year ---- 
-### load files ----
+# year ---- 
+## load files ----
 # create pattern
 temp3 = list.files(path = "data_derived/MMM", pattern=".+_yr.+.csv$", full.names = T)
 
@@ -155,7 +155,7 @@ df_year <- bind_rows(df_year, df_HLTP_yr)
 
 write.csv(df_year, "output/df_year.csv", row.names = F)
 
-# table
+## table ----
 tab_year <- kbl(df_year, 
                 col.names = c('Study_area', 'Species', 'trt', 'Age',
                               'n', 'min', 'max', 'mean', 'sd',
@@ -169,7 +169,7 @@ tab_year <- kbl(df_year,
 
 save_kable(tab_year, file = "output/tab_year.html")
 
-
+## summary ----
 ### density ----
 
 df_year_den <- df_year |>

@@ -43,7 +43,7 @@ df_age <- df |>
                 #min_den = min(density_new, na.rm = T), 
                 min_den = safe_min(density_new), 
                 max_den = safe_max(density_new),
-                mean_den = mean(density_new, na.rm = T),
+                mean_den = sum(density_new, na.rm = T),
                 sd_den = sd(density_new, na.rm = T),
                 min_bio = safe_min(biomass_new),
                 max_bio = safe_max(biomass_new),
