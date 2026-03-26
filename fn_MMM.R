@@ -47,7 +47,7 @@ df_age <- df |>
                 sd_den = sd(density_new, na.rm = T),
                 min_bio = safe_min(biomass_new),
                 max_bio = safe_max(biomass_new),
-                mean_bio = mean(biomass_new, na.rm = T),
+                mean_bio = sum(biomass_new, na.rm = T),
                 sd_bio = sd(biomass_new, na.rm = T)
       )
    write.csv(df_age, paste0(file_path, file_name, ".csv"), row.names = F)
