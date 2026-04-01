@@ -139,11 +139,11 @@ str(ls_year, 1)
 
 
 df_year <- bind_rows(ls_year)
-df_year <- df_year[, c(1:2, 5:9, 3, 10:12, 4, 13)]
+#df_year <- df_year[, c(1:2, 5:9, 3, 10:12, 4, 13)]
+df_year <- df_year[, c(1, 5, 2, 6, 7:9, 3, 10:12, 4, 13)]
 
 # import SB
 df_SB_yr <- read.csv("data_derived/mmm/SB_year_2001_2003.csv")
-df_SB_yr$study_area <- "Stoney Brook"
 df_SB_yr <- df_SB_yr |>
    rename(species = Species)
 
