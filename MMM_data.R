@@ -75,37 +75,44 @@ df_all2$abun
 df_all2_sum <- df_all2 |>
    filter(Sweep <= 3) |>
    group_by(Year, Species, Station, Area) |>
-   summarise(bio.sum = sum(bio.sum, na.rm = T), abun = sum(abun)) |>
+   summarise(bio.sum = sum(bio.sum, na.rm = T), abun = sum(abun, na.rm = T)) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
+
+df_all2_sum$study_area <- "Stoney Brook"
+
+df_all2_sum$age_new <- if_else(df_all2_sum$Species %in% c("AS", "BT"), "age-1+", "YOY")
+df_all2_sum$Species <- if_else(df_all2_sum$Species == "ASYOY", "AS", df_all2_sum$Species)
+df_all2_sum$Species <- if_else(df_all2_sum$Species == "BTYOY", "BT", df_all2_sum$Species)
+
 
 write.csv(df_all2_sum, "data_derived/MMM/SB_dage_2001_2003.csv", row.names = F)
 
 
 sb_site <- df_all2_sum |>
-   group_by(Species, Year) |>
+   group_by(study_area, Year, Species, age_new) |>
    summarise(n = n(),
-             min_den = min(abun.stand), 
-             max_den = max(abun.stand),
-             mean_den = mean(abun.stand),
-             sd_den = sd(abun.stand),
-             min_bio = min(bio.stand),
-             max_bio = max(bio.stand),
-             mean_bio = mean(bio.stand),
-             sd_bio = sd(bio.stand)
+             min_den = min(abun.stand, na.rm = T), 
+             max_den = max(abun.stand, na.rm = T),
+             mean_den = mean(abun.stand, na.rm = T),
+             sd_den = sd(abun.stand, na.rm = T),
+             min_bio = min(bio.stand, na.rm = T),
+             max_bio = max(bio.stand, na.rm = T),
+             mean_bio = mean(bio.stand, na.rm = T),
+             sd_bio = sd(bio.stand, na.rm = T)
    )
 write.csv(sb_site, "data_derived/mmm/SB_site_2001_2003.csv", row.names = F)
 
 sb_year <- df_all2_sum |>
-   group_by(Species) |>
+   group_by(study_area, Species, age_new) |>
    summarise(n = n(),
-             min_den = min(abun.stand), 
-             max_den = max(abun.stand),
-             mean_den = mean(abun.stand),
-             sd_den = sd(abun.stand),
-             min_bio = min(bio.stand),
-             max_bio = max(bio.stand),
-             mean_bio = mean(bio.stand),
-             sd_bio = sd(bio.stand)
+             min_den = min(abun.stand, na.rm = T), 
+             max_den = max(abun.stand, na.rm = T),
+             mean_den = mean(abun.stand, na.rm = T),
+             sd_den = sd(abun.stand, na.rm = T),
+             min_bio = min(bio.stand, na.rm = T),
+             max_bio = max(bio.stand, na.rm = T),
+             mean_bio = mean(bio.stand, na.rm = T),
+             sd_bio = sd(bio.stand, na.rm = T)
    )
 write.csv(sb_year, "data_derived/mmm/SB_year_2001_2003.csv", row.names = F)
 
@@ -227,7 +234,7 @@ df_HT_sum <- df_HLTP |>
 study_area <- c("Trepassey", "Highland")
 year <- c(2013:2018)
 station <- c(18, 19, 8, 37, 5, 10,  7, 20, 50, 15)
-species <- c("AS", "ASYOY", "BT", "BTYOY")
+species <- c("AS", "ASY", "BT", "BTY")
 sweep <- c(1:4)
 
 df_grid <- expand.grid(Study_area = study_area, Year = year, Species = species, station = station, Sweep = sweep) |> 
@@ -269,36 +276,43 @@ df_all2$abun
 df_all2_HT_sum <- df_all2_HT |>
    filter(Sweep <= 3) |>
    group_by(Study_area, Year, Species, station, Area) |>
-   summarise(bio.sum = sum(bio.sum, na.rm = T), abun = sum(abun)) |>
+   summarise(bio.sum = sum(bio.sum, na.rm = T), abun = sum(abun, na.rm = T)) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
 
+df_all2_HT_sum$age_new <- if_else(df_all2_HT_sum$Species %in% c("AS", "BT"), "age-1+", "YOY")
+df_all2_HT_sum$Species <- if_else(df_all2_HT_sum$Species == "ASY", "AS", df_all2_HT_sum$Species)
+df_all2_HT_sum$Species <- if_else(df_all2_HT_sum$Species == "BTY", "BT", df_all2_HT_sum$Species)
 write.csv(df_all2_HT_sum, "data_derived/mmm/HLTP_dage_2012_2018.csv", row.names = F)
 
 HLTP_site <- df_all2_HT_sum |>
-   group_by(Study_area, Species, Year) |>
+   group_by(Study_area, Year, Species, age_new) |>
+   filter(!(Species == "BT" & age_new == "YOY")) |>
+   filter(!(Study_area == "Trepassey" & Year == 2018 & 
+   Species == "AS" & age_new == "YOY")) |>
    summarise(n = n(),
-             min_den = min(abun.stand), 
-             max_den = max(abun.stand),
-             mean_den = mean(abun.stand),
-             sd_den = sd(abun.stand),
-             min_bio = min(bio.stand),
-             max_bio = max(bio.stand),
-             mean_bio = mean(bio.stand),
-             sd_bio = sd(bio.stand)
+             min_den = min(abun.stand, na.rm = T), 
+             max_den = max(abun.stand, na.rm = T),
+             mean_den = mean(abun.stand, na.rm = T),
+             sd_den = sd(abun.stand, na.rm = T),
+             min_bio = min(bio.stand, na.rm = T),
+             max_bio = max(bio.stand, na.rm = T),
+             mean_bio = mean(bio.stand, na.rm = T),
+             sd_bio = sd(bio.stand, na.rm = T)
    )
 write.csv(HLTP_site, "data_derived/mmm/HLTP_site_2012_2018.csv", row.names = F)
 
 HLTP_year <- df_all2_HT_sum |>
-   group_by(Study_area, Species) |>
+   group_by(Study_area, Species, age_new) |>
+   filter(!(Species == "BT" & age_new == "YOY")) |>
    summarise(n = n(),
-             min_den = min(abun.stand), 
-             max_den = max(abun.stand),
-             mean_den = mean(abun.stand),
-             sd_den = sd(abun.stand),
-             min_bio = min(bio.stand),
-             max_bio = max(bio.stand),
-             mean_bio = mean(bio.stand),
-             sd_bio = sd(bio.stand),
-             min_bio = min(bio.stand)
+             min_den = min(abun.stand, na.rm = T), 
+             max_den = max(abun.stand, na.rm = T),
+             mean_den = mean(abun.stand, na.rm = T),
+             sd_den = sd(abun.stand, na.rm = T),
+             min_bio = min(bio.stand, na.rm = T),
+             max_bio = max(bio.stand, na.rm = T),
+             mean_bio = mean(bio.stand, na.rm = T),
+             sd_bio = sd(bio.stand, na.rm = T),
+             min_bio = min(bio.stand, na.rm = T)
    )
 write.csv(HLTP_year, "data_derived/mmm/HLTP_year_2012_2018.csv", row.names = F)
