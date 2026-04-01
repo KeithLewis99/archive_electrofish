@@ -56,10 +56,11 @@ df_age <- bind_rows(df_age, df_SB1)
 # import HLTP
 df_HLTP <- read.csv("data_derived/mmm/HLTP_dage_2012_2018.csv")
 df_HLTP1 <- df_HLTP[, c(1:4, 8, 9)] |>
-   rename(study_area = Study_area, year = Year, species = Species, site = Stn_no, mean_den = abun.stand, mean_bio = bio.stand)
+   rename(study_area = Study_area, year = Year, species = Species, site = station, mean_den = abun.stand, mean_bio = bio.stand)
 df_HLTP1$site <- as.character(df_HLTP1$site)
 
 df_age <- bind_rows(df_age, df_HLTP1)
+df_age <- df_age |> arrange(study_area, trt, species, age_new)
 write.csv(df_age, "output/df_age.csv", row.names = F)
 
 # make table
@@ -104,6 +105,7 @@ ls_site$SB_site_2001_2003 <- ls_site$SB_site_2001_2003 |>
 
 # bind
 df_site <- bind_rows(ls_site)
+df_site <- df_site |> arrange(study_area, trt, species, age_new)
 #df_site <- df_site[, c(1:2, 5:10, 3, 11:13, 4, 14)]
 write.csv(df_site, "output/df_site.csv", row.names = F)
 
@@ -152,7 +154,7 @@ df_HLTP_yr <- read.csv("data_derived/mmm/HLTP_year_2012_2018.csv")
 df_HLTP_yr <- df_HLTP_yr |>
    rename(study_area = Study_area, species = Species)
 df_year <- bind_rows(df_year, df_HLTP_yr)
-
+df_year <- df_year |> arrange(study_area, trt, species, age_new)
 write.csv(df_year, "output/df_year.csv", row.names = F)
 
 ## table ----
@@ -161,7 +163,7 @@ tab_year <- kbl(df_year,
                               'n', 'min', 'max', 'mean', 'sd',
                               'min', 'max', 'mean', 'sd'),
                 align = 'c', 
-                caption = "Density and Biomass by Year", 
+                caption = "Density and Biomass", 
                 digits = 3, booktabs = TRUE, longtable = TRUE) |>
    collapse_rows(valign = "top", latex_hline = "major") |>
    add_header_above(header = c(" " = 4, "Density" = 5, "Biomass" = 4)) |>
@@ -169,7 +171,9 @@ tab_year <- kbl(df_year,
 
 save_kable(tab_year, file = "output/tab_year.html")
 
+
 ## summary ----
+#### used to draw out meaningful values
 ### density ----
 
 df_year_den <- df_year |>
