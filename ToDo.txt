@@ -1,0 +1,40 @@
+Synthesis
+ X redo graphs 
+ X create summaries 
+ 
+ graphs to synthesis document
+ incorporate into tables for tech bulletin
+ 
+ Coding:
+X rename the files for age, site, and year for all synthesis sites - use XX_yyy_startyear_endyear.csv, e.g., GC_age_2004_2016.csv
+/ GC - need trtype in tables, PB and RB need trt, SC needs type (pools v riffles), [ see other studies as well]
+ 
+ 
+Archival data
+X zeros in raw data?
+X Something on Archival studies
+
+Tabulated data
+X fix data summaries
+X - stream width analysis - just do the table
+/// - Discussion - eastern Canada studies 
+	X - lit search, 
+	- incorporate
+- Fix Trepassey in df_med - check that alignment is right
+
+X meeting request with Keith and Kristin
+
+AOS
+- Register for conference
+- Neo
+
+X Contact
+Fisheries grant - https://www.gov.nl.ca/fisheries/programs/scholarships/
+Sustainable Fisheries and Oceans Policy
+Petten Building
+30 Strawberry Marsh Road
+P.O. Box 8700
+St. John’s, NL
+A1B 4J6
+Tel: (709) 729-3712
+Fax: (709) 729-6082
