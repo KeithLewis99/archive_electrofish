@@ -26,15 +26,62 @@ unique(df_sb$Station) # all OK - "R1"   "R2"   "R3"   "R4"   "F1"   "F2"   "POOL
 species_filter <- c("BN", "SMELT", "BNYOY", "EEL", "EELS", "STICKLE")
 df_sb <- df_sb |> filter(!Species %in% species_filter)
 
-## summarize ----
 df_sum <- df_sb |>
+   group_by(Year, Species, Station, Sweep, Area) |>
+   summarise(bio.sum = sum(Weight.g), abun = n()) 
+
+# create grid ----
+year <- c("2001", "2002", "2003")
+station <- c("F2", "POOL", "R1", "R2", "R3", "R4")
+species <- c("AS", "ASYOY", "BT", "BTYOY")
+sweep <- c(1:4)
+
+df_grid <- expand.grid(Year = year, Species = species, Station = station, Sweep = sweep) |> 
+   arrange(Year, Species, Station, Sweep)
+df_grid$Year <- as.integer(as.character(df_grid$Year))
+df_grid$Sweep <- as.integer(df_grid$Sweep)
+
+
+# join ----
+## grid to data
+df_all <- full_join(df_grid, df_sum, by = c("Year", "Species", "Station", "Sweep")) |>
+   arrange(Year, Species, Station, Sweep)
+
+# get max Sweep ----
+df_stn_tag <- df_all |>
+   group_by(Year) |>
+   filter(!is.na(abun)) |>
+   summarise(tag = max(Sweep)) |>
+   print(n = Inf)
+
+df_stn_tag_all <- df_all |>
+   group_by(Year, Station) |>
+   filter(!is.na(abun)) |>
+   summarise(tag = max(Sweep)) |>
+   print(n = Inf)
+plot(density(df_stn_tag_all$tag))
+
+# join all and tags
+df_all2 <- full_join(df_all, df_stn_tag, by = c("Year")) |>
+   arrange(Year, Species, Station, Sweep) |>
+   filter(Sweep <= tag) #!is.na(abun) &
+
+# replace NA with zero
+df_all2 <- df_all2 |>
+   replace_na(list(bio.sum = 0, abun = 0)) 
+df_all2$abun
+
+## summarize ----
+df_all2_sum <- df_all2 |>
    filter(Sweep <= 3) |>
    group_by(Year, Species, Station, Area) |>
-   summarise(bio.sum = sum(Weight.g, na.rm = T), abun = n()) |>
+   summarise(bio.sum = sum(bio.sum, na.rm = T), abun = sum(abun)) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
-write.csv(df_sum, "data_derived/MMM/SB_dage_2001_2003.csv", row.names = F)
 
-sb_site <- df_sum |>
+write.csv(df_all2_sum, "data_derived/MMM/SB_dage_2001_2003.csv", row.names = F)
+
+
+sb_site <- df_all2_sum |>
    group_by(Species, Year) |>
    summarise(n = n(),
              min_den = min(abun.stand), 
@@ -48,7 +95,7 @@ sb_site <- df_sum |>
    )
 write.csv(sb_site, "data_derived/mmm/SB_site_2001_2003.csv", row.names = F)
 
-sb_year <- df_sum |>
+sb_year <- df_all2_sum |>
    group_by(Species) |>
    summarise(n = n(),
              min_den = min(abun.stand), 
@@ -169,17 +216,65 @@ df_HLTP <- df_HLTP %>%
    mutate(Area = ifelse(is.na(Area), mean(Area, na.rm = TRUE), Area)) %>%
    ungroup()
 
+## summarise ----
+df_HT_sum <- df_HLTP |>
+   group_by(Study_area, Year, Species, Stn_no, Sweep, Area) |>
+   summarise(bio.sum = sum(Weight.g), abun = n()) |>
+   rename(station = Stn_no)
 
-## summary ----
 
-df_HLTP_sum <- df_HLTP |>
+# create grid ----
+study_area <- c("Trepassey", "Highland")
+year <- c(2013:2018)
+station <- c(18, 19, 8, 37, 5, 10,  7, 20, 50, 15)
+species <- c("AS", "ASYOY", "BT", "BTYOY")
+sweep <- c(1:4)
+
+df_grid <- expand.grid(Study_area = study_area, Year = year, Species = species, station = station, Sweep = sweep) |> 
+   arrange(Study_area, Year, Species, station, Sweep)
+df_grid$Year <- as.integer(as.character(df_grid$Year))
+df_grid$Sweep <- as.integer(df_grid$Sweep)
+
+
+# join ----
+## grid to data
+df_HT_all <- full_join(df_grid, df_HT_sum, by = c("Study_area", "Year", "Species", "station", "Sweep")) |>
+   arrange(Study_area, Year, Species, station, Sweep)
+
+# get max Sweep ----
+df_stn_HT_tag <- df_HT_all |>
+   group_by(Study_area, Year) |>
+   filter(!is.na(abun)) |>
+   summarise(tag = max(Sweep)) |>
+   print(n = Inf)
+
+df_stn_HT_tag_all <- df_HT_all |>
+   group_by(Study_area, Year, station) |>
+   filter(!is.na(abun)) |>
+   summarise(tag = max(Sweep)) |>
+   print(n = Inf)
+plot(density(df_stn_tag_all$tag))
+
+# join all and tags
+df_all2_HT <- full_join(df_HT_all, df_stn_HT_tag, by = c("Study_area", "Year")) |>
+   arrange(Study_area, Year, Species, station, Sweep) |>
+   filter(Sweep <= tag) #!is.na(abun) &
+
+# replace NA with zero
+df_all2_HT <- df_all2_HT |>
+   replace_na(list(bio.sum = 0, abun = 0)) 
+df_all2$abun
+
+## summarize ----
+df_all2_HT_sum <- df_all2_HT |>
    filter(Sweep <= 3) |>
-   group_by(Study_area, Year, Species, Stn_no, Area) |>
-   summarise(bio.sum = sum(Weight.g, na.rm = T), abun = n()) |>
+   group_by(Study_area, Year, Species, station, Area) |>
+   summarise(bio.sum = sum(bio.sum, na.rm = T), abun = sum(abun)) |>
    mutate(abun.stand = abun/Area*100, bio.stand = bio.sum/Area*100)
-write.csv(df_HLTP_sum, "data_derived/mmm/HLTP_dage_2012_2018.csv", row.names = F)
 
-HLTP_site <- df_HLTP_sum |>
+write.csv(df_all2_HT_sum, "data_derived/mmm/HLTP_dage_2012_2018.csv", row.names = F)
+
+HLTP_site <- df_all2_HT_sum |>
    group_by(Study_area, Species, Year) |>
    summarise(n = n(),
              min_den = min(abun.stand), 
@@ -193,7 +288,7 @@ HLTP_site <- df_HLTP_sum |>
    )
 write.csv(HLTP_site, "data_derived/mmm/HLTP_site_2012_2018.csv", row.names = F)
 
-HLTP_year <- df_HLTP_sum |>
+HLTP_year <- df_all2_HT_sum |>
    group_by(Study_area, Species) |>
    summarise(n = n(),
              min_den = min(abun.stand), 
